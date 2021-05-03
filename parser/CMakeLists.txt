@@ -26,11 +26,10 @@ ADD_FLEX_BISON_DEPENDENCY(MyScanner MyParser)
 
 add_library(
     ${PROJECT_NAME}
+    driver.cpp
     ${BISON_MyParser_OUTPUTS}
     ${FLEX_MyScanner_OUTPUTS}
 )
-
-MESSAGE("!!!!!!!!" ${PROJECT_SOURCE_DIR})
 
 target_include_directories(
     ${PROJECT_NAME} 
