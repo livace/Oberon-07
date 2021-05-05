@@ -11,6 +11,7 @@
     #include <compiler/types/identifier.h>
     #include <compiler/types/type.h>
     #include <compiler/types/variable_declaration.h>
+    #include <parser/ast/procedure_declaration.h>
 
     class Scanner;
     class Driver;
@@ -104,6 +105,7 @@
 %token <float> REAL "real"
 
 %nterm <Identifier*> ident
+%nterm <ProcedureDeclaration*> ProcedureDeclaration
 
 %printer { yyo << $$; } <*>;
 
@@ -342,7 +344,9 @@ ForStatement:
     | "FOR" ident ":=" expression "TO" expression "BY" ConstExpression "DO" StatementSequence "END" {}
 
 ProcedureDeclaration:
-     ProcedureHeading ";" ProcedureBody ident
+    ProcedureHeading ";" ProcedureBody ident {
+        $$ = new ProcedureDeclaration();
+    }
 
 ProcedureHeading:
     PROCEDURE identdef {}

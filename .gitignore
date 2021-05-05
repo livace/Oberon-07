@@ -32,3 +32,8 @@
 *.app
 
 build*
+
+parser/location.hh
+parser/parser.hh
+parser/parser.cpp
+parser/scanner.cpp
