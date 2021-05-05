@@ -1,30 +1,30 @@
 %{
-    #include <cerrno>
     #include <climits>
-    #include <cstdlib>
-    #include <cstring> // strerror
-    #include <string>
-    #include <iostream>
     #include "driver.hh"
     #include "parser.hh"
 %}
 
-%option noyywrap nounput noinput batch debug
+%option noyywrap nounput noinput
 
 %option c++
 %option yyclass="Scanner"
 
 %{
-  // A number symbol corresponding to the value in S.
-  yy::parser::symbol_type make_NUMBER(
+  yy::parser::symbol_type make_INTEGER(
+    const std::string &s,
+    const yy::parser::location_type& loc
+  );
+  yy::parser::symbol_type make_REAL(
     const std::string &s,
     const yy::parser::location_type& loc
   );
 %}
 
-id    [a-zA-Z][a-zA-Z_0-9]*
-int   [0-9]+
-blank [ \t\r]
+ident      [a-zA-Z][a-zA-Z_0-9]*
+integer    [0-9]+
+real       [0-9]+.[0-9]+
+string     \"(\\.|[^"\\])*\"
+blank      [ \t\r]
 
 %{
   // Code run each time a pattern is matched.
@@ -32,22 +32,52 @@ blank [ \t\r]
 %}
 %%
 %{
-  // A handy shortcut to the location held by the driver.
   yy::location& loc = driver.location;
-  // Code run each time yylex is called.
   loc.step();
 %}
-
+IDENT
 {blank}+   loc.step ();
 \n+        loc.lines (yyleng); loc.step ();
 
-"class"    return yy::parser::make_CLASS  (loc);
-"public"   return yy::parser::make_PUBLIC (loc);
-"static"   return yy::parser::make_STATIC (loc);
-"void"     return yy::parser::make_VOID   (loc);
-"main"     return yy::parser::make_MAIN   (loc);
-"System.out.println" return yy::parser::make_SOUT (loc);
+"RECORD"
+"POINTER"
+"#"
+"IS"
+"IN"
+"&"
+"MOD"
+"DIV"
+"NIL"
+"TRUE"
+"FALSE"
+"set"
+"ELSE"
+"ELSIF"
+"THEN"
+"IF"
+"UNTIL"
+"REPEAT"
+"BY"
+"DO"
+"TO"
+"FOR"
+"PROCEDURE"
+"RETURN"
+"END"
+"BEGIN"
+"CONST"
+"TYPE"
+"OF"
+"ARRAY"
+":="
+"["
+"]"
+"^"
+"~"
+"VAR"      return yy::parser::make_VAR  (loc);
+","        return yy::parser::make_COMMA  (loc);
 "-"        return yy::parser::make_MINUS  (loc);
+":"        return yy::parser::make_COLON  (loc);
 "+"        return yy::parser::make_PLUS   (loc);
 "*"        return yy::parser::make_STAR   (loc);
 "/"        return yy::parser::make_SLASH  (loc);
@@ -58,21 +88,19 @@ blank [ \t\r]
 "\n"       return yy::parser::make_EOL    (loc);
 "{"        return yy::parser::make_LBRACE (loc);
 "}"        return yy::parser::make_RBRACE (loc);
-
 ";"        return yy::parser::make_SEMICOLON (loc);
-"int"      return yy::parser::make_INT    (loc);
-"boolean"  return yy::parser::make_BOOLEAN(loc);
-"length"   return yy::parser::make_LENGTH (loc);
 
-{int}      return make_NUMBER(yytext, loc);
-{id}       return yy::parser::make_IDENTIFIER(yytext, loc);
+{integer}      return make_INTEGER(yytext, loc);
+{real}         return make_REAL(yytext, loc);
+{ident}       return yy::parser::make_IDENT(yytext, loc);
+{string}       return yy::parser::make_STRING(yytext, loc);
 .          {
                 throw yy::parser::syntax_error(loc, "invalid character: " + std::string(yytext));
            }
 <<EOF>>    return yy::parser::make_END (loc);
 %%
 
-yy::parser::symbol_type make_NUMBER(
+yy::parser::symbol_type make_INTEGER(
   const std::string &s,
   const yy::parser::location_type& loc
 ) {
@@ -80,5 +108,14 @@ yy::parser::symbol_type make_NUMBER(
   long n = strtol(s.c_str(), NULL, 10);
   if (! (INT_MIN <= n && n <= INT_MAX && errno != ERANGE))
     throw yy::parser::syntax_error(loc, "integer is out of range: " + s);
-  return yy::parser::make_NUMBER((int) n, loc);
+  return yy::parser::make_INTEGER((int) n, loc);
+}
+
+yy::parser::symbol_type make_REAL(
+  const std::string &s,
+  const yy::parser::location_type& loc
+) {
+  errno = 0;
+  float n = strtof(s.c_str(), NULL);
+  return yy::parser::make_REAL((float) n, loc);
 }

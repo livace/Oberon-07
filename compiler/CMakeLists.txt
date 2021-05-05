@@ -1,5 +1,8 @@
 project(compiler)
 
-add_executable(${PROJECT_NAME} main.cpp)
+add_executable(main main.cpp
+        ../parser/driver.cpp
+        ../parser/scanner.cpp
+        ../parser/parser.cpp)
 
-target_include_directories(${PROJECT_NAME} PUBLIC ..)
+target_include_directories(main PUBLIC ..)

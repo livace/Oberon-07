@@ -1,1 +1,0 @@
-inline int a = 1;

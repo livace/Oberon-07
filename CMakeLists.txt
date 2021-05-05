@@ -8,5 +8,5 @@ SET(CMAKE_RUNTIME_OUTPUT_DIRECTORY "${CMAKE_BINARY_DIR}/")
 find_package(FLEX REQUIRED)
 find_package(BISON REQUIRED)
 
-add_subdirectory(parser kek/parser)
-add_subdirectory(compiler kek/compiler)
+add_subdirectory(${CMAKE_SOURCE_DIR}/parser parser)
+add_subdirectory(${CMAKE_SOURCE_DIR}/compiler compiler)

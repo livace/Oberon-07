@@ -1,0 +1,2 @@
+VAR i, j: INTEGER;
+i := 5;

@@ -31,12 +31,12 @@
 // version 2.2 of Bison.
 
 /**
- ** \file /home/livace/Oberon-07/parser/location.hh
+ ** \file /home/phibonoci/Oberon-07/parser/location.hh
  ** Define the yy::location class.
  */
 
-#ifndef YY_YY_HOME_LIVACE_OBERON_07_PARSER_LOCATION_HH_INCLUDED
-# define YY_YY_HOME_LIVACE_OBERON_07_PARSER_LOCATION_HH_INCLUDED
+#ifndef YY_YY_HOME_PHIBONOCI_OBERON_07_PARSER_LOCATION_HH_INCLUDED
+# define YY_YY_HOME_PHIBONOCI_OBERON_07_PARSER_LOCATION_HH_INCLUDED
 
 # include <iostream>
 # include <string>
@@ -54,7 +54,7 @@
 # endif
 
 namespace yy {
-#line 58 "/home/livace/Oberon-07/parser/location.hh"
+#line 58 "/home/phibonoci/Oberon-07/parser/location.hh"
 
   /// A point in a source file.
   class position
@@ -327,6 +327,6 @@ namespace yy {
   }
 
 } // yy
-#line 331 "/home/livace/Oberon-07/parser/location.hh"
+#line 331 "/home/phibonoci/Oberon-07/parser/location.hh"
 
-#endif // !YY_YY_HOME_LIVACE_OBERON_07_PARSER_LOCATION_HH_INCLUDED
+#endif // !YY_YY_HOME_PHIBONOCI_OBERON_07_PARSER_LOCATION_HH_INCLUDED
