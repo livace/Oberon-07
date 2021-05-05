@@ -18,12 +18,17 @@
     const std::string &s,
     const yy::parser::location_type& loc
   );
+  yy::parser::symbol_type make_STRING_FROM_CHAR(
+    const std::string &s,
+    const yy::parser::location_type& loc
+  );
 %}
 
 ident      [a-zA-Z][a-zA-Z_0-9]*
 integer    [0-9]+
 real       [0-9]+.[0-9]+
 string     \"(\\.|[^"\\])*\"
+char       [0-9][0-9A-F]*X
 blank      [ \t\r]
 
 %{
@@ -101,6 +106,7 @@ blank      [ \t\r]
 {real}         return make_REAL(yytext, loc);
 {ident}        return yy::parser::make_IDENT(yytext, loc);
 {string}       return yy::parser::make_STRING(yytext, loc);
+{char}         return make_STRING_FROM_CHAR(yytext, loc);
 .          {
                 throw yy::parser::syntax_error(loc, "invalid character: " + std::string(yytext));
            }
@@ -122,7 +128,16 @@ yy::parser::symbol_type make_REAL(
   const std::string &s,
   const yy::parser::location_type& loc
 ) {
-  errno = 0;
   float n = strtof(s.c_str(), NULL);
   return yy::parser::make_REAL((float) n, loc);
 }
+
+yy::parser::symbol_type make_STRING_FROM_CHAR(
+  const std::string &s,
+  const yy::parser::location_type& loc
+) {
+  std::string temp = s.substr(0, s.size() - 1);
+  std::string result(1, static_cast<char>(strtol(temp.data(), NULL, 10)));
+  return yy::parser::make_STRING(result, loc);
+}
+

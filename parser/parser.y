@@ -103,31 +103,15 @@
 %token <int> INTEGER "integer"
 %token <float> REAL "real"
 
-%nterm <int> exp
-%nterm <Type*> type
 %nterm <Identifier*> ident
-%nterm <VariableDeclaration*> variable_declaration
 
 %printer { yyo << $$; } <*>;
 
 %%
-%start module;
+%start unit;
 
 unit:
     module {std::cout << "PROGRAM";}
-
-exp:
-    number {std::cout << "NUMBER\n";}
-    | exp number
-
-declaration:
-    variable_declaration {}
-
-variable_declaration:
-    ident ":" type {$$ = new VariableDeclaration($1, $3);}
-
-//type:
-//    INTEGERDECLARATION {$$ = new Type($1);}
 
 qualident:
     ident {}
@@ -137,9 +121,10 @@ identdef:
     ident {}
     | ident "*" {}
 
-ScaleFactor:
-    "E" "+" INTEGER {}
-    | "E" "-" INTEGER {}
+// TODO: Add to scanner?
+//ScaleFactor:
+//    "E" "+" INTEGER {}
+//    | "E" "-" INTEGER {}
 
 number:
     INTEGER {std::cout << "INTEGER\n";}
@@ -249,7 +234,7 @@ factor:
     | "NIL" {}
     | "TRUE" {}
     | "FALSE" {}
-    | "set" {}
+    | set {}
     | designator {}
     | designator ActualParameters {}
     | "(" expression ")" {}
@@ -286,7 +271,7 @@ selector:
     "." ident {}
     | "[" ExpList "]" {}
     | "^" {}
-    //| "(" qualident ")" {} // TODO: FIX
+//    | "(" qualident ")" {} // TODO: FIX
 
 statement:
     assignment {}
@@ -319,7 +304,7 @@ ElsifList:
     | "ELSIF" expression "THEN" StatementSequence ElsifList {}
 
 CaseStatement:
-    "CASE" expression "OF" case "END"
+    "CASE" expression "OF" cases "END"
 
 cases:
     case {}
@@ -370,7 +355,14 @@ ProcedureBody:
     | DeclarationSequence "END" {}
 
 DeclarationSequence:
-    ProcedureDeclarations
+    | VAR VariableDeclarations
+    | "TYPE" TypeDeclarations
+    | "CONST" ConstDeclarations
+    | "TYPE" TypeDeclarations VAR VariableDeclarations
+    | "CONST" ConstDeclarations VAR VariableDeclarations
+    | "CONST" ConstDeclarations "TYPE" TypeDeclarations
+    | "CONST" ConstDeclarations "TYPE" TypeDeclarations VAR VariableDeclarations
+    | ProcedureDeclarations
     | VAR VariableDeclarations ProcedureDeclarations
     | "TYPE" TypeDeclarations ProcedureDeclarations
     | "CONST" ConstDeclarations ProcedureDeclarations
@@ -391,9 +383,8 @@ TypeDeclarations:
     TypeDeclaration ";" {}
     | TypeDeclarations TypeDeclaration ";" {}
 
-// Zero or more
 ProcedureDeclarations:
-    | ProcedureDeclaration ";" {}
+    ProcedureDeclaration ";" {}
     | ProcedureDeclarations ProcedureDeclaration ";" {}
 
 FormalParameters:
