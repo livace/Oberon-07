@@ -4,7 +4,7 @@
     #include "parser.hh"
 %}
 
-%option noyywrap nounput noinput
+%option noyywrap 
 
 %option c++
 %option yyclass="Scanner"
@@ -40,6 +40,20 @@ blank      [ \t\r]
   yy::location& loc = driver.location;
   loc.step();
 %}
+
+"(*" {
+  int c;
+
+  while((c = yyinput()) != 0) {
+    if(c == '*') {
+      if((c = yyinput()) == ')') {
+        break;
+      } else {
+        unput(c);
+      }
+    }
+  }
+}
 
 {blank}+   loc.step ();
 \n+        loc.lines (yyleng); loc.step ();
