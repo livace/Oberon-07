@@ -35,10 +35,12 @@ blank      [ \t\r]
   yy::location& loc = driver.location;
   loc.step();
 %}
-IDENT
+
 {blank}+   loc.step ();
 \n+        loc.lines (yyleng); loc.step ();
 
+"IMPORT"   return yy::parser::make_IMPORT (loc);
+"MODULE"   return yy::parser::make_MODULE (loc);
 "RECORD"   return yy::parser::make_RECORD (loc);
 "POINTER"  return yy::parser::make_POINTER (loc);
 "#"        return yy::parser::make_SHARP (loc);
@@ -61,7 +63,7 @@ IDENT
 "DO"       return yy::parser::make_DO (loc);
 "TO"       return yy::parser::make_TO (loc);
 "FOR"      return yy::parser::make_FOR (loc);
-"PROCEDURE"return yy::parser::make_PROCEDURE (loc);
+"PROCEDURE" return yy::parser::make_PROCEDURE (loc);
 "RETURN"   return yy::parser::make_RETURN (loc);
 "END"      return yy::parser::make_END (loc);
 "BEGIN"    return yy::parser::make_BEGIN (loc);
@@ -83,16 +85,20 @@ IDENT
 "/"        return yy::parser::make_SLASH  (loc);
 "("        return yy::parser::make_LPAREN (loc);
 ")"        return yy::parser::make_RPAREN (loc);
-"="        return yy::parser::make_ASSIGN (loc);
+"="        return yy::parser::make_EQUAL (loc);
 "."        return yy::parser::make_POINT  (loc);
 "\n"       return yy::parser::make_EOL    (loc);
 "{"        return yy::parser::make_LBRACE (loc);
 "}"        return yy::parser::make_RBRACE (loc);
 ";"        return yy::parser::make_SEMICOLON (loc);
+"<"        return yy::parser::make_LESS (loc);
+"<="       return yy::parser::make_LE (loc);
+">"        return yy::parser::make_GREATER (loc);
+">="       return yy::parser::make_GE (loc);
 
 {integer}      return make_INTEGER(yytext, loc);
 {real}         return make_REAL(yytext, loc);
-{ident}       return yy::parser::make_IDENT(yytext, loc);
+{ident}        return yy::parser::make_IDENT(yytext, loc);
 {string}       return yy::parser::make_STRING(yytext, loc);
 .          {
                 throw yy::parser::syntax_error(loc, "invalid character: " + std::string(yytext));

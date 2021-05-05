@@ -40,7 +40,7 @@
 %token
     EOF 0 "end of file"
     EOL "\n"
-    ASSIGN "="
+    EQUAL "="
     MINUS "-"
     PLUS "+"
     STAR "*"
@@ -53,6 +53,10 @@
     COLON ":"
     POINT "."
     COMMA ","
+    GREATER ">"
+    GE ">="
+    LESS "<"
+    LE "<="
     VAR "VAR"
     RECORD "RECORD"
     POINTER "POINTER"
@@ -89,6 +93,8 @@
     RIGHT_SQUARE_BRACKET "]"
     CARET "^"
     TILDA "~"
+    IMPORT "IMPORT"
+    MODULE "MODULE"
 ;
 
 %token <std::string> IDENT "ident"
@@ -104,10 +110,10 @@
 %printer { yyo << $$; } <*>;
 
 %%
-%start DeclarationSequence;
+%start module;
 
 unit:
-    variable_declaration {std::cout << "PROGRAM";}
+    module {std::cout << "PROGRAM";}
 
 exp:
     number {std::cout << "NUMBER\n";}
@@ -121,9 +127,6 @@ variable_declaration:
 
 //type:
 //    INTEGERDECLARATION {$$ = new Type($1);}
-
-ident:
-    "ident" {$$ = new Identifier($1);}
 
 qualident:
     ident {}
@@ -194,15 +197,15 @@ PointerType:
     "POINTER" "TO" type {}
 
 ProcedureType:
-    "PROCEDURE" {}
-    | "PROCEDURE" FormalParameters {}
+    PROCEDURE {}
+    | PROCEDURE FormalParameters {}
 
 VariableDeclaration:
     IdentList ":" type
 
 expression:
-    SimpleExpression {}
-    | relation SimpleExpression {}
+    SimpleExpression {std::cout << "SIMPLE EXPRESSION\n";}
+    | SimpleExpression relation SimpleExpression {std::cout << "SIMPLE EXPRESSION RELATION\n";}
 
 relation:
     "=" {}
@@ -215,7 +218,8 @@ relation:
     | "IS" {}
 
 SimpleExpression:
-    "+" terms {}
+    terms {}
+    | "+" terms {}
     | "-" terms {}
 
 terms:
@@ -251,18 +255,12 @@ factor:
     | "~" factor {}
 
 designator:
-    qualident {}
+    qualident {std::cout << "DESIGNATOR\n";}
     | qualident selectors {}
 
 selectors:
     selector {}
     | selector selectors {}
-
-selector:
-    "." ident {}
-    | "[" ExpList "]" {}
-    | "^" {}
-    | "(" qualident ")"
 
 set:
     "{" elements "}" {}
@@ -282,6 +280,12 @@ ExpList:
 ActualParameters:
     "(" ")" {}
     | "(" ExpList ")" {}
+
+selector:
+    "." ident {}
+    | "[" ExpList "]" {}
+    | "^" {}
+    //| "(" qualident ")" {} // TODO: FIX
 
 statement:
     assignment {}
@@ -306,6 +310,8 @@ StatementSequence:
 IfStatement:
     "IF" expression "THEN" StatementSequence ElsifList "ELSE" StatementSequence "END" {}
     | "IF" expression "THEN" StatementSequence ElsifList "END" {}
+    | "IF" expression "THEN" StatementSequence "ELSE" StatementSequence "END" {}
+    | "IF" expression "THEN" StatementSequence "END"
 
 ElsifList:
     "ELSIF" expression "THEN" StatementSequence {}
@@ -334,14 +340,13 @@ label:
     | STRING {}
     | qualident {}
 
-// TODO: {ELSIF expression DO StatementSequence}
 WhileStatement:
     "WHILE" expression "DO" StatementSequence "END" {}
-    | "WHILE" expression "DO" StatementSequence ElsifList "END" {}
+    | "WHILE" expression "DO" StatementSequence ElsifWhileList "END" {}
 
-ElsifList:
+ElsifWhileList:
     "ELSIF" expression "DO" StatementSequence {}
-    | "ELSIF" expression "DO" StatementSequence ElsifList
+    | "ELSIF" expression "DO" StatementSequence ElsifWhileList
 
 RepeatStatement:
     "REPEAT" StatementSequence "UNTIL" expression {}
@@ -354,8 +359,8 @@ ProcedureDeclaration:
      ProcedureHeading ";" ProcedureBody ident
 
 ProcedureHeading:
-    "PROCEDURE" identdef {}
-    | "PROCEDURE" identdef FormalParameters {}
+    PROCEDURE identdef {}
+    | PROCEDURE identdef FormalParameters {}
 
 ProcedureBody:
     DeclarationSequence "BEGIN" StatementSequence "RETURN" expression "END"
@@ -409,9 +414,28 @@ idents:
     | ident "," idents {}
 
 FormalType:
-    "ARRAY" "OF" qualident {}
+    qualident {}
     | "ARRAY" "OF" FormalType {}
 
+module:
+    "MODULE" ident ";"  ImportList DeclarationSequence "BEGIN" StatementSequence "END" ident "." {}
+    | "MODULE" ident ";"  DeclarationSequence "BEGIN" StatementSequence "END" ident "." {}
+    | "MODULE" ident ";"  ImportList DeclarationSequence "END" ident "." {}
+    | "MODULE" ident ";"  DeclarationSequence "END" ident "." {}
+
+ImportList:
+    "IMPORT" imports ";" {}
+
+imports:
+    import {}
+    | import "," imports {}
+
+import:
+    ident {}
+    | ident ":=" ident {}
+
+ident:
+    "ident" {$$ = new Identifier($1);}
 %%
 
 void
