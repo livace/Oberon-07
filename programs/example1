@@ -24,7 +24,7 @@ MODULE TestOberon0;
     perm(n)
   END Permutations;
 
-  PROCEDURE MagicSquares*;
+  PROCEDURE MagicSquares*;  (*magic square of order 3, 5, 7, ... *)
     VAR i, j, x, nx, nsq, n: INTEGER;
       M: ARRAY 13 OF ARRAY 13 OF INTEGER;
   BEGIN OpenInput;
@@ -55,7 +55,7 @@ MODULE TestOberon0;
     x := 1; inc := 4; lim := 1; sqr := 4; m := 0; i := 3;
     WHILE i <= n DO
       REPEAT x := x + inc; inc := 6 - inc;
-        IF sqr <= x THEN
+        IF sqr <= x THEN  (*sqr = p[lim]^2*)
           v[lim] := sqr; lim := lim + 1; sqr := p[lim]*p[lim]
         END ;
         k := 2; prim := TRUE;
@@ -71,11 +71,11 @@ MODULE TestOberon0;
     IF m > 0 THEN WriteLn END
   END PrimeNumbers;
 
-  PROCEDURE Fractions*;
+  PROCEDURE Fractions*;  (* Tabulate fractions 1/n*)
     CONST Base = 10; N = 32;
     VAR i, j, m, r, n: INTEGER;
-      d: ARRAY N OF INTEGER;
-      x: ARRAY N OF INTEGER;
+      d: ARRAY N OF INTEGER;  (*digits*)
+      x: ARRAY N OF INTEGER;  (*index*)
   BEGIN OpenInput;
     IF ~eot() THEN
       ReadInt(n); i := 2;
@@ -87,7 +87,7 @@ MODULE TestOberon0;
         END ;
         WriteInt(i, 5); WriteChar(9); WriteChar(46); j := 0;
         WHILE j < x[r] DO WriteChar(d[j] + 48); j := j+1 END ;
-        WriteChar(32);
+        WriteChar(32);  (*blank*)
         WHILE j < m DO WriteChar(d[j] + 48); j := j+1 END ;
         WriteLn; i := i+1
       END
@@ -95,7 +95,7 @@ MODULE TestOberon0;
   END Fractions;
 
   PROCEDURE Powers*;
-    CONST N = 32; M = 11;
+    CONST N = 32; M = 11;  (*M ~ N*log2*)
     VAR i, k, n, exp: INTEGER;
       c, r, t: INTEGER;
       d: ARRAY M OF INTEGER;
@@ -104,23 +104,25 @@ MODULE TestOberon0;
     IF ~eot() THEN
       ReadInt(n); d[0] := 1; k := 1; exp := 1;
       WHILE exp < n DO
-        c := 0;  i := 0;
+        (*compute d = 2^exp*)
+        c := 0;  (*carry*) i := 0;
         WHILE i < k DO
           t := 2*d[i] + c;
           IF t < 10 THEN d[i] := t; c := 0 ELSE d[i] := t - 10; c := 1 END ;
           i := i+1
         END ;
         IF c = 1 THEN d[k] := 1; k := k+1 END ;
-        i := M;
-        WHILE i > k DO i := i-1; WriteChar(32) END ;
+        (*write d*) i := M;
+        WHILE i > k DO i := i-1; WriteChar(32) (*blank*) END ;
         WHILE i > 0 DO i := i-1; WriteChar(d[i] + 48) END ;
         WriteInt(exp, M);
+        (*compute  f = 2^-exp*)
         WriteChar(9); WriteChar(46); r := 0; i := 1;
         WHILE i < exp DO
           r := 10*r + f[i]; f[i] := r DIV 2; r := r MOD 2;
           WriteChar(f[i] + 48); i := i+1
         END ;
-        f[exp] := 5; WriteChar(53); WriteLn; exp := exp + 1
+        f[exp] := 5; WriteChar(53); (*5*) WriteLn; exp := exp + 1
       END
     END
   END Powers;
