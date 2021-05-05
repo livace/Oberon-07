@@ -8,9 +8,10 @@
 
 %code requires {
     #include <string>
-    #include <compiler/types/identifier.h>
-    #include <compiler/types/type.h>
-    #include <compiler/types/variable_declaration.h>
+    
+    #include <parser/ast/identifier.h>
+    #include <parser/ast/type.h>
+    #include <parser/ast/variable_declaration.h>
     
     #include <parser/ast/procedure_declaration.h>
     #include <parser/ast/procedure_heading.h>

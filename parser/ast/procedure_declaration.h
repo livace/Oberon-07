@@ -10,7 +10,7 @@ public:
         std::cerr << "Create ProcedureDeclaration Ast\n";
     }
 
-    void accept(Visitor &visitor) {
+    void accept(Visitor &visitor) override {
         visitor.visit(this);
     }
 
