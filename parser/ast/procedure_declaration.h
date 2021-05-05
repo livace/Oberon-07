@@ -9,4 +9,8 @@ public:
     ProcedureDeclaration() {
         std::cerr << "Create ProcedureDeclaration Ast\n";
     }
+
+    void accept(Visitor &visitor) {
+        visitor.visit(this);
+    }
 };
