@@ -7,6 +7,7 @@
 #include "scanner.h"
 #include "parser.hh"
 
+#include "ast/ast.h"
 
 class Driver {
 public:
@@ -16,6 +17,8 @@ public:
     int parse(const std::string& f);
     std::string file;
     bool trace_parsing;
+
+    Ast *main;
 
     void scan_begin();
     void scan_end();

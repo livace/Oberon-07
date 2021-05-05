@@ -11,7 +11,9 @@
     #include <compiler/types/identifier.h>
     #include <compiler/types/type.h>
     #include <compiler/types/variable_declaration.h>
+    
     #include <parser/ast/procedure_declaration.h>
+    #include <parser/ast/procedure_heading.h>
 
     class Scanner;
     class Driver;
@@ -106,6 +108,7 @@
 
 %nterm <Identifier*> ident
 %nterm <ProcedureDeclaration*> ProcedureDeclaration
+%nterm <ProcedureHeading*> ProcedureHeading
 
 %printer { yyo << $$; } <*>;
 
@@ -345,16 +348,17 @@ ForStatement:
 
 ProcedureDeclaration:
     ProcedureHeading ";" ProcedureBody ident {
-        $$ = new ProcedureDeclaration();
+        $$ = new ProcedureDeclaration($1);
+        driver.main = $$;
     }
 
 ProcedureHeading:
-    PROCEDURE identdef {}
-    | PROCEDURE identdef FormalParameters {}
+    PROCEDURE identdef { $$ = new ProcedureHeading(); }
+    | PROCEDURE identdef FormalParameters { $$ = new ProcedureHeading(); }
 
 ProcedureBody:
-    DeclarationSequence "BEGIN" StatementSequence "RETURN" expression "END"
-    |  DeclarationSequence "BEGIN" StatementSequence "END" {}
+    DeclarationSequence "BEGIN" StatementSequence "RETURN" expression "END" {}
+    | DeclarationSequence "BEGIN" StatementSequence "END" {}
     | DeclarationSequence "RETURN" expression "END" {}
     | DeclarationSequence "END" {}
 

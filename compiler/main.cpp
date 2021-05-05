@@ -1,6 +1,8 @@
 #include <iostream>
 #include <parser/driver.hh>
 
+#include "parser/visitor/print_visitor.h"
+
 int main(int argc, char **argv) {
   Driver driver;
   int res = 0;
@@ -11,6 +13,9 @@ int main(int argc, char **argv) {
           driver.trace_scanning = true;
       } else if (!driver.parse(argv[i])) {
           std::cout << "Ok" << '\n';
+          PrintVisitor visitor;
+          driver.main->accept(visitor);
+   
       } else {
           res = 1;
       }
