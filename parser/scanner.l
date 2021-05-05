@@ -39,42 +39,42 @@ IDENT
 {blank}+   loc.step ();
 \n+        loc.lines (yyleng); loc.step ();
 
-"RECORD"
-"POINTER"
-"#"
-"IS"
-"IN"
-"&"
-"MOD"
-"DIV"
-"NIL"
-"TRUE"
-"FALSE"
-"set"
-"ELSE"
-"ELSIF"
-"THEN"
-"IF"
-"UNTIL"
-"REPEAT"
-"BY"
-"DO"
-"TO"
-"FOR"
-"PROCEDURE"
-"RETURN"
-"END"
-"BEGIN"
-"CONST"
-"TYPE"
-"OF"
-"ARRAY"
-":="
-"["
-"]"
-"^"
-"~"
-"VAR"      return yy::parser::make_VAR  (loc);
+"RECORD"   return yy::parser::make_RECORD (loc);
+"POINTER"  return yy::parser::make_POINTER (loc);
+"#"        return yy::parser::make_SHARP (loc);
+"IS"       return yy::parser::make_IS (loc);
+"IN"       return yy::parser::make_IN (loc);
+"&"        return yy::parser::make_AMPERSAND (loc);
+"MOD"      return yy::parser::make_MOD (loc);
+"DIV"      return yy::parser::make_DIV (loc);
+"NIL"      return yy::parser::make_NIL (loc);
+"TRUE"     return yy::parser::make_TRUE (loc);
+"FALSE"    return yy::parser::make_FALSE (loc);
+"set"      return yy::parser::make_SET (loc);
+"ELSE"     return yy::parser::make_ELSE (loc);
+"ELSIF"    return yy::parser::make_ELSIF (loc);
+"THEN"     return yy::parser::make_THEN (loc);
+"IF"       return yy::parser::make_IF (loc);
+"UNTIL"    return yy::parser::make_UNTIL (loc);
+"REPEAT"   return yy::parser::make_REPEAT (loc);
+"BY"       return yy::parser::make_BY (loc);
+"DO"       return yy::parser::make_DO (loc);
+"TO"       return yy::parser::make_TO (loc);
+"FOR"      return yy::parser::make_FOR (loc);
+"PROCEDURE"return yy::parser::make_PROCEDURE (loc);
+"RETURN"   return yy::parser::make_RETURN (loc);
+"END"      return yy::parser::make_END (loc);
+"BEGIN"    return yy::parser::make_BEGIN (loc);
+"CONST"    return yy::parser::make_CONST (loc);
+"TYPE"     return yy::parser::make_TYPE (loc);
+"OF"       return yy::parser::make_OF (loc);
+"ARRAY"    return yy::parser::make_ARRAY (loc);
+":="       return yy::parser::make_ASSIGNMENT (loc);
+"["        return yy::parser::make_LEFT_SQUARE_BRACKET (loc);
+"]"        return yy::parser::make_RIGHT_SQUARE_BRACKET (loc);
+"^"        return yy::parser::make_CARET  (loc);
+"~"        return yy::parser::make_TILDA  (loc);
+"VAR"      return yy::parser::make_VAR    (loc);
 ","        return yy::parser::make_COMMA  (loc);
 "-"        return yy::parser::make_MINUS  (loc);
 ":"        return yy::parser::make_COLON  (loc);
@@ -97,7 +97,7 @@ IDENT
 .          {
                 throw yy::parser::syntax_error(loc, "invalid character: " + std::string(yytext));
            }
-<<EOF>>    return yy::parser::make_END (loc);
+<<EOF>>    return yy::parser::make_EOF (loc);
 %%
 
 yy::parser::symbol_type make_INTEGER(
