@@ -12,9 +12,17 @@
     #include <parser/ast/identifier.h>
     #include <parser/ast/type.h>
     #include <parser/ast/variable_declaration.h>
-    
+    #include <parser/ast/qualident.h>
     #include <parser/ast/procedure_declaration.h>
     #include <parser/ast/procedure_heading.h>
+    #include <parser/ast/module.h>
+    #include <parser/ast/const_declaration.h>
+    #include <parser/ast/const_expression.h>
+    #include <parser/ast/expression.h>
+    #include <parser/ast/identdef.h>
+    #include <parser/ast/number.h>
+    #include <parser/ast/string.h>
+    #include <parser/ast/root.h>
 
     class Scanner;
     class Driver;
@@ -107,9 +115,18 @@
 %token <int> INTEGER "integer"
 %token <float> REAL "real"
 
+%nterm <Module*> module
+%nterm <Root*> unit
 %nterm <Identifier*> ident
+%nterm <Qualident*> qualident
 %nterm <ProcedureDeclaration*> ProcedureDeclaration
 %nterm <ProcedureHeading*> ProcedureHeading
+%nterm <IdentDef*> identdef
+%nterm <Number*> number
+%nterm <String*> string
+%nterm <ConstExpression*> ConstExpression
+%nterm <ConstDeclaration*> ConstDeclaration
+%nterm <Expression*> expression
 
 %printer { yyo << $$; } <*>;
 
@@ -117,15 +134,18 @@
 %start unit;
 
 unit:
-    module {std::cout << "PROGRAM";}
+    module {
+    	$$ = new Root($1);
+    	driver.root = $$;
+    }
 
 qualident:
-    ident {}
-    | ident "." ident {}
+    ident {$$ = new Qualident($1);}
+    | ident "." ident {$$ = new Qualident($1, $3);}
 
 identdef:
-    ident {}
-    | ident "*" {}
+    ident {$$ = new IdentDef($1);}
+    | ident "*" {$$ = new IdentDef($1, true);}
 
 // TODO: Add to scanner?
 //ScaleFactor:
@@ -133,17 +153,17 @@ identdef:
 //    | "E" "-" INTEGER {}
 
 number:
-    INTEGER {std::cout << "INTEGER\n";}
-    | REAL {std::cout << "REAL\n";}
+    INTEGER {$$ = new Number($1);}
+    | REAL {$$ = new Number($1);}
 
 string:
-    STRING {std::cout << "STRING\n";}
+    STRING {$$ = new String($1);}
 
 ConstDeclaration:
-    identdef "=" ConstExpression {}
+    identdef "=" ConstExpression {$$ = new ConstDeclaration($1, $3);}
 
 ConstExpression:
-    expression {}
+    expression {$$ = new ConstExpression($1);} // TODO: Do we really need this?
 
 TypeDeclaration:
     identdef "=" type
@@ -196,8 +216,8 @@ VariableDeclaration:
     IdentList ":" type
 
 expression:
-    SimpleExpression {std::cout << "SIMPLE EXPRESSION\n";}
-    | SimpleExpression relation SimpleExpression {std::cout << "SIMPLE EXPRESSION RELATION\n";}
+    SimpleExpression {$$ = new Expression();}
+    | SimpleExpression relation SimpleExpression {$$ = new Expression();}
 
 relation:
     "=" {}
@@ -247,7 +267,7 @@ factor:
     | "~" factor {}
 
 designator:
-    qualident {std::cout << "DESIGNATOR\n";}
+    qualident {}
     | qualident selectors {}
 
 selectors:
@@ -350,7 +370,6 @@ ForStatement:
 ProcedureDeclaration:
     ProcedureHeading ";" ProcedureBody ident {
         $$ = new ProcedureDeclaration($1);
-        driver.main = $$;
     }
 
 ProcedureHeading:
@@ -419,10 +438,10 @@ FormalType:
     | "ARRAY" "OF" FormalType {}
 
 module:
-    "MODULE" ident ";"  ImportList DeclarationSequence "BEGIN" StatementSequence "END" ident "." {}
-    | "MODULE" ident ";"  DeclarationSequence "BEGIN" StatementSequence "END" ident "." {}
-    | "MODULE" ident ";"  ImportList DeclarationSequence "END" ident "." {}
-    | "MODULE" ident ";"  DeclarationSequence "END" ident "." {}
+    "MODULE" ident ";"  ImportList DeclarationSequence "BEGIN" StatementSequence "END" ident "." {$$ = new Module();}
+    | "MODULE" ident ";"  DeclarationSequence "BEGIN" StatementSequence "END" ident "." {$$ = new Module();}
+    | "MODULE" ident ";"  ImportList DeclarationSequence "END" ident "." {$$ = new Module();}
+    | "MODULE" ident ";"  DeclarationSequence "END" ident "." {$$ = new Module();}
 
 ImportList:
     "IMPORT" imports ";" {}

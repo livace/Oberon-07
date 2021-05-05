@@ -2,8 +2,6 @@
 
 #include "ast.h"
 
-#include <iostream>
-
 class Identifier : public Ast {
 public:
     Identifier(std::string identifier) : identifier_(std::move(identifier)) {}
@@ -15,7 +13,7 @@ public:
     void accept(Visitor &visitor) override {
         visitor.visit(this);
     }
-    
+
 private:
     std::string identifier_;
 };

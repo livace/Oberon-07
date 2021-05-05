@@ -14,8 +14,7 @@ int main(int argc, char **argv) {
       } else if (!driver.parse(argv[i])) {
           std::cout << "Ok" << '\n';
           PrintVisitor visitor;
-          driver.main->accept(visitor);
-   
+          driver.root->accept(visitor);
       } else {
           res = 1;
       }

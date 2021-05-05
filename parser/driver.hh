@@ -18,7 +18,7 @@ public:
     std::string file;
     bool trace_parsing;
 
-    Ast *main;
+    Ast *root;
 
     void scan_begin();
     void scan_end();
