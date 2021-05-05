@@ -56,6 +56,7 @@ blank      [ \t\r]
 "ELSE"     return yy::parser::make_ELSE (loc);
 "ELSIF"    return yy::parser::make_ELSIF (loc);
 "THEN"     return yy::parser::make_THEN (loc);
+"WHILE"    return yy::parser::make_WHILE (loc);
 "IF"       return yy::parser::make_IF (loc);
 "UNTIL"    return yy::parser::make_UNTIL (loc);
 "REPEAT"   return yy::parser::make_REPEAT (loc);

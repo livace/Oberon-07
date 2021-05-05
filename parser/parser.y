@@ -95,6 +95,7 @@
     TILDA "~"
     IMPORT "IMPORT"
     MODULE "MODULE"
+    WHILE "WHILE"
 ;
 
 %token <std::string> IDENT "ident"
@@ -304,7 +305,7 @@ ProcedureCall:
     | designator ActualParameters {}
 
 StatementSequence:
-    statement {}
+    | statement {}
     | statement ";" StatementSequence {}
 
 IfStatement:
@@ -436,6 +437,7 @@ import:
 
 ident:
     "ident" {$$ = new Identifier($1);}
+
 %%
 
 void
