@@ -18,64 +18,69 @@
 #include <parser/ast/root.h>
 
 class PrintVisitor : public Visitor {
-    void visit(Identifier *identifier) {
+    void visit(Identifier *identifier) override {
         std::cerr << identifier->identifier();
     }  
 
-    void visit(ProcedureDeclaration *procedure_declaration) {
+    void visit(ProcedureDeclaration *procedure_declaration) override {
         std::cerr << "PROCEDURE";
         procedure_declaration->procedureHeading()->accept(*this);
     }
 
-    void visit(ProcedureHeading *procedure_heading) {
+    void visit(ProcedureHeading *procedure_heading) override {
         std::cerr << "<some name>";
     }  
 
+<<<<<<< HEAD
     void visit(Type *type) {
         std::cerr << "type";
+=======
+    void visit(Type *type) override {
+        std::cerr << type->name();
+>>>>>>> More classes
     }  
 
-    void visit(VariableDeclaration *variable_declaration) {
+    void visit(VariableDeclaration *variable_declaration) override {
         variable_declaration->identifier()->accept(*this);
         std::cerr << ":";
         variable_declaration->type()->accept(*this);
     }
 
-    void visit(Qualident *qualident) {
+    void visit(Qualident *qualident) override {
         if (auto prefix = qualident->prefix(); prefix) {
             prefix->accept(*this);
         }
         qualident->identifier()->accept(*this);
     }
 
-    void visit(Module *module) {
+    void visit(Module *module) override {
     }
 
-    void visit(ConstDeclaration *const_declaration) {
+    void visit(ConstDeclaration *const_declaration) override {
         const_declaration->identifier()->accept(*this);
         const_declaration->constExpression()->accept(*this);
     }
 
-    void visit(ConstExpression *const_expression) {
+    void visit(ConstExpression *const_expression) override {
         const_expression->expression()->accept(*this);
     }
 
-    void visit(Expression *expression) {
+    void visit(Expression *expression) override {
     }
 
-    void visit(IdentDef *identdef) {
+    void visit(IdentDef *identdef) override {
         std::cerr << identdef->identifier() << ", is_exported: " << identdef->isExported();
     }
 
-    void visit(Number *number) {
+    void visit(Number *number) override {
         std::cerr << number->float_value();
     }
 
-    void visit(String *string) {
+    void visit(String *string) override {
         std::cerr << string->value();
     }
 
-    void visit(Root *root) {
+    void visit(Root *root) override {
         root->module()->accept(*this);
     }
 
@@ -131,4 +136,63 @@ class PrintVisitor : public Visitor {
 
     }
 
+    void visit(BinaryMinus *binary_minus) override {
+        std::cerr << "-";
+    }
+    
+    void visit(BinaryPlus *binary_plus) override {
+        std::cerr << "+";
+    }
+    
+    void visit(Division *division) override {
+        std::cerr << "/";
+    }
+    
+    void visit(IntegerDivision *integer_division) override {
+        std::cerr << "//";
+    }
+    
+    void visit(LogicalConjunction *logical_conjuction) override {
+        std::cerr << "&";
+    }
+    
+    void visit(LogicalDisjunction *logical_disjunction) override {
+        std::cerr << "|";
+    }
+
+    void visit(Modulo *modulo) override {
+        std::cerr << "%";
+    }
+    
+    void visit(Multiplication *multimplication) override {
+        std::cerr << "*";
+    }
+
+    void visit(SimpleExpression *simple_expression) override {
+        std::cerr << "&";
+    }
+
+    void visit(SingleTerm *single_term) override {
+        single_term->term()->accept(*this);
+    }
+
+    void visit(Term *term) override {
+        std::cerr << "<term>"; // TODO
+    }
+
+    void visit(TermOperation *term_operation) override {
+        term_operation->lhs()->accept(*this);
+        std::cerr << " ";
+        term_operation->add_operator()->accept(*this);
+        std::cerr << " ";
+        term_operation->rhs()->accept(*this);
+    }
+
+    void visit(UnaryMinus *unary_minus) override {
+        std::cerr << "-";
+    }
+
+    void visit(UnaryPlus *unary_plus) override {
+        std::cerr << "+";
+    }
 };

@@ -27,6 +27,21 @@ class QualidentType;
 class Real;
 class RecordType;
 class TypeDeclaration;
+class BinaryMinus;
+class BinaryPlus;
+class Division;
+class Factor;
+class IntegerDivision;
+class LogicalConjunction;
+class LogicalDisjunction;
+class Modulo;
+class Multiplication;
+class SimpleExpression;
+class SingleTerm;
+class Term;
+class TermOperation;
+class UnaryMinus;
+class UnaryPlus;
 
 class Visitor {
 public:
@@ -57,4 +72,18 @@ public:
     virtual void visit(Real *real) = 0;
     virtual void visit(RecordType *record_type) = 0;
     virtual void visit(TypeDeclaration *type_declaration) = 0;
+    virtual void visit(BinaryMinus *binary_minus) = 0;
+    virtual void visit(BinaryPlus *binary_plus) = 0;
+    virtual void visit(Division *division) = 0;
+    virtual void visit(IntegerDivision *integer_division) = 0;
+    virtual void visit(LogicalConjunction *logical_conjuction) = 0;
+    virtual void visit(LogicalDisjunction *logical_disjunction) = 0;
+    virtual void visit(Modulo *modulo) = 0;
+    virtual void visit(Multiplication *multimplication) = 0;
+    virtual void visit(SimpleExpression *simple_expression) = 0;
+    virtual void visit(SingleTerm *single_term) = 0;
+    virtual void visit(Term *term) = 0;
+    virtual void visit(TermOperation *term_operation) = 0;
+    virtual void visit(UnaryMinus *unary_minus) = 0;
+    virtual void visit(UnaryPlus *unary_plus) = 0;
 };

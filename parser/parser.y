@@ -36,6 +36,24 @@
     #include <parser/ast/real.h>
     #include <parser/ast/record_type.h>
     #include <parser/ast/type_declaration.h>
+    #include <parser/ast/add_operator.h>
+    #include <parser/ast/binary_minus.h>
+    #include <parser/ast/binary_plus.h>
+    #include <parser/ast/binary_minus.h>
+    #include <parser/ast/division.h>
+    #include <parser/ast/integer_division.h>
+    #include <parser/ast/logical_conjunction.h>
+    #include <parser/ast/logical_disjunction.h>
+    #include <parser/ast/modulo.h>
+    #include <parser/ast/mul_operator.h>
+    #include <parser/ast/multiplication.h>
+    #include <parser/ast/simple_expression.h>
+    #include <parser/ast/single_term.h>
+    #include <parser/ast/term.h>
+    #include <parser/ast/term_operation.h>
+    #include <parser/ast/terms.h>
+    #include <parser/ast/unary_minus.h>
+    #include <parser/ast/unary_plus.h>    
 
     class Scanner;
     class Driver;
@@ -152,6 +170,11 @@
 %nterm <RecordType*> RecordType
 %nterm <Type*> type
 %nterm <TypeDeclaration*> TypeDeclaration
+%nterm <SimpleExpression*> SimpleExpression
+%nterm <MulOperator*> MulOperator
+%nterm <Terms*> terms
+%nterm <Term*> term 
+%nterm <AddOperator*> AddOperator
 
 %printer { yyo << $$; } <*>;
 
@@ -255,29 +278,29 @@ relation:
     | "IS" {}
 
 SimpleExpression:
-    terms {}
-    | "+" terms {}
-    | "-" terms {}
+    terms { $$ = new SimpleExpression($1); }
+    | "+" terms { $$ = new SimpleExpression($2, new UnaryPlus());}
+    | "-" terms { $$ = new SimpleExpression($2, new UnaryMinus()); }
 
 terms:
-    term {}
-    | term AddOperator terms {}
+    term { $$ = new SingleTerm($1); }
+    | term AddOperator terms { $$ = new TermOperation($1, $2, $3); }
 
 AddOperator:
-    "+" {}
-    | "-" {}
-    | "OR" {}
+    "+" { $$ = new BinaryPlus(); }
+    | "-" { $$ = new BinaryMinus(); }
+    | "OR" {  $$ = new LogicalDisjunction(); }
 
 term:
-    factor {}
-    | factor MulOperator term {}
+    factor { $$ = new Term(); } // TODO
+    | factor MulOperator term { $$ = new Term(); } // TODO
 
 MulOperator:
-    "*" {}
-    | "/" {}
-    | "DIV" {}
-    | "MOD" {}
-    | "&" {}
+    "*" { $$ = new Multiplication(); }
+    | "/" { $$ = new Division(); }
+    | "DIV" { $$ = new IntegerDivision(); }
+    | "MOD" { $$ = new Modulo(); }
+    | "&" { $$ = new LogicalConjunction(); }
 
 factor:
     number {}
