@@ -23,6 +23,19 @@
     #include <parser/ast/number.h>
     #include <parser/ast/string.h>
     #include <parser/ast/root.h>
+    #include <parser/ast/array_type.h>
+    #include <parser/ast/base_type.h>
+    #include <parser/ast/field_list.h>
+    #include <parser/ast/field_list_sequence.h>
+    #include <parser/ast/ident_list.h>
+    #include <parser/ast/integer.h>
+    #include <parser/ast/length.h>
+    #include <parser/ast/length_list.h>
+    #include <parser/ast/pointer_type.h>
+    #include <parser/ast/qualident_type.h>
+    #include <parser/ast/real.h>
+    #include <parser/ast/record_type.h>
+    #include <parser/ast/type_declaration.h>
 
     class Scanner;
     class Driver;
@@ -127,6 +140,18 @@
 %nterm <ConstExpression*> ConstExpression
 %nterm <ConstDeclaration*> ConstDeclaration
 %nterm <Expression*> expression
+%nterm <ArrayType*> ArrayType
+%nterm <BaseType*> BaseType
+%nterm <FieldList*> FieldList
+%nterm <FieldListSequence*> FieldListSequence
+%nterm <IdentList*> IdentList
+%nterm <Length*> length
+%nterm <LengthList*> LengthList
+%nterm <PointerType*> PointerType
+%nterm <QualidentType*> QualidentType
+%nterm <RecordType*> RecordType
+%nterm <Type*> type
+%nterm <TypeDeclaration*> TypeDeclaration
 
 %printer { yyo << $$; } <*>;
 
@@ -166,47 +191,47 @@ ConstExpression:
     expression {$$ = new ConstExpression($1);} // TODO: Do we really need this?
 
 TypeDeclaration:
-    identdef "=" type
+    identdef "=" type {$$ = new TypeDeclaration($1, $3);}
 
 type:
-    qualident {}
-    | ArrayType {}
-    | RecordType {}
-    | PointerType {}
-    | ProcedureType {}
+    qualident {$$ = new QualidentType($1);}
+    | ArrayType {$$ = $1;}
+    | RecordType {$$ = $1;}
+    | PointerType {$$ = $1;}
+    | ProcedureType {} // TODO: Add
 
 ArrayType:
-    "ARRAY" lengths "OF" type
+    "ARRAY" LengthList "OF" type {$$ = new ArrayType($2, $4);}
 
-lengths:
-    length {}
-    | length "," lengths {}
+LengthList:
+    length {$$ = new LengthList($1);}
+    | LengthList "," length {$1->addLength($3);}
 
-length:
-    ConstExpression {}
+length: // length == ConstExpression == exression
+    ConstExpression {$$ = new Length($1);}
 
 RecordType:
-    "RECORD" "(" BaseType ")" FieldListSequence "END" {}
-    | "RECORD" FieldListSequence "END" {}
-    | "RECORD" "(" BaseType ")" "END" {}
-    | "RECORD" "END" {}
+    "RECORD" "(" BaseType ")" FieldListSequence "END" {$$ = new RecordType($3, $5);}
+    | "RECORD" FieldListSequence "END" {$$ = new RecordType($2);}
+    | "RECORD" "(" BaseType ")" "END" {$$ = new RecordType($3);}
+    | "RECORD" "END" {$$ = new RecordType();}
 
 BaseType:
-    qualident {}
+    qualident {$$ = new BaseType($1);}
 
 FieldListSequence:
-    FieldList {}
-    | FieldList ";" FieldListSequence {}
+    FieldList {$$ = new FieldListSequence($1);}
+    | FieldListSequence ";" FieldList {$1->addFieldList($3);}
 
 FieldList:
-    IdentList ":" type {}
+    IdentList ":" type {$$ = new FieldList($1, $3);}
 
 IdentList:
-    identdef {}
-    | identdef "," IdentList {}
+    identdef {$$ = new IdentList($1);}
+    | IdentList "," identdef {$1->addIdentDef($3);}
 
 PointerType:
-    "POINTER" "TO" type {}
+    "POINTER" "TO" type {$$ = new PointerType($3);}
 
 ProcedureType:
     PROCEDURE {}

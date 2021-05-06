@@ -14,6 +14,19 @@ class Expression;
 class IdentDef;
 class Number;
 class String;
+class ArrayType;
+class BaseType;
+class FieldList;
+class FieldListSequence;
+class IdentList;
+class Integer;
+class Length;
+class LengthList;
+class PointerType;
+class QualidentType;
+class Real;
+class RecordType;
+class TypeDeclaration;
 
 class Visitor {
 public:
@@ -31,4 +44,17 @@ public:
     virtual void visit(IdentDef *identdef) = 0;
     virtual void visit(Number *number) = 0;
     virtual void visit(String *string) = 0;
+    virtual void visit(ArrayType *array_type) = 0;
+    virtual void visit(BaseType *base_type) = 0;
+    virtual void visit(FieldList *field_list) = 0;
+    virtual void visit(FieldListSequence *field_list_sequence) = 0;
+    virtual void visit(IdentList *ident_list) = 0;
+    virtual void visit(Integer *integer) = 0;
+    virtual void visit(Length *length) = 0;
+    virtual void visit(LengthList *length_list) = 0;
+    virtual void visit(PointerType *pointer_type) = 0;
+    virtual void visit(QualidentType *qualident_type) = 0;
+    virtual void visit(Real *real) = 0;
+    virtual void visit(RecordType *record_type) = 0;
+    virtual void visit(TypeDeclaration *type_declaration) = 0;
 };

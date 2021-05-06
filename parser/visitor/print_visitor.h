@@ -32,7 +32,7 @@ class PrintVisitor : public Visitor {
     }  
 
     void visit(Type *type) {
-        std::cerr << type->name();
+        std::cerr << "type";
     }  
 
     void visit(VariableDeclaration *variable_declaration) {
@@ -79,5 +79,56 @@ class PrintVisitor : public Visitor {
         root->module()->accept(*this);
     }
 
-    
+    void visit(ArrayType *array_type) {
+
+    }
+
+    void visit(BaseType *base_type) {
+
+    }
+
+    void visit(FieldList *field_list) {
+
+    }
+
+    void visit(FieldListSequence *field_list_sequence) {
+
+    }
+
+    void visit(IdentList *ident_list) {
+
+    }
+
+    void visit(Integer *integer) {
+
+    }
+
+    void visit(Length *length) {
+
+    }
+
+    void visit(LengthList *length_list) {
+
+    }
+
+    void visit(PointerType *pointer_type) {
+
+    }
+
+    void visit(QualidentType *qualident_type) {
+
+    }
+
+    void visit(Real *real) {
+
+    }
+
+    void visit(RecordType *record_type) {
+
+    }
+
+    void visit(TypeDeclaration *type_declaration) {
+
+    }
+
 };
