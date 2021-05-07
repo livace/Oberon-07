@@ -339,4 +339,31 @@ class PrintVisitor : public Visitor {
     void visit(FalseFactor* false_factor) override {   
         std::cerr << "FALSE";   
     }
+
+    void visit(Elements* elements) override {
+        go(elements->element());
+
+        if (elements->elements()) {
+            std::cerr << ", ";
+            go(elements);
+        }
+    }
+
+    void visit(Range* range) override {
+        go(range->from());
+        std::cerr << "..";
+        go(range->to());
+    }
+
+    void visit(Set* set) override {
+        go(set->elements());
+    }
+
+    void visit(SetFactor* set_factor) override {
+        go(set_factor->set());
+    }
+
+    void visit(SingleElement* single_element) override {
+        go(single_element->expression());
+    }
 };

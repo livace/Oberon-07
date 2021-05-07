@@ -61,6 +61,11 @@ class StringFactor;
 class NilFactor;
 class TrueFactor;
 class FalseFactor;
+class Elements;
+class Range;
+class Set;
+class SetFactor;
+class SingleElement;
 
 class Visitor {
 public:
@@ -124,4 +129,9 @@ public:
     virtual void visit(NilFactor* nil_factor) = 0;
     virtual void visit(TrueFactor* true_factor) = 0;
     virtual void visit(FalseFactor* false_factor) = 0;
+    virtual void visit(Elements* elements) = 0; 
+    virtual void visit(Range* range) = 0; 
+    virtual void visit(Set* set) = 0; 
+    virtual void visit(SetFactor* set_factor) = 0; 
+    virtual void visit(SingleElement* single_element) = 0; 
 };

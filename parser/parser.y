@@ -74,6 +74,12 @@
     #include <parser/ast/nil_factor.h>
     #include <parser/ast/true_factor.h>
     #include <parser/ast/false_factor.h>
+    #include <parser/ast/element.h>
+    #include <parser/ast/elements.h>
+    #include <parser/ast/range.h>
+    #include <parser/ast/set.h>
+    #include <parser/ast/set_factor.h>
+    #include <parser/ast/single_element.h>
 
     class Scanner;
     class Driver;
@@ -211,6 +217,9 @@
 %nterm <ProcedureDeclarationList*> ProcedureDeclarationList
 %nterm <TypeDeclarationList*> TypeDeclarationList
 %nterm <Factor*> factor
+%nterm <Set*> set
+%nterm <Elements*> elements
+%nterm <Element*> element
 
 %printer { yyo << $$; } <*>;
 
@@ -344,7 +353,7 @@ factor:
     | "NIL" { $$ = new NilFactor(); }
     | "TRUE" { $$ = new TrueFactor(); }
     | "FALSE" { $$ = new FalseFactor(); }
-    | set {}
+    | set { $$ = new SetFactor($1); }
     | designator {}
     | designator ActualParameters {}
     | "(" expression ")" {}
@@ -359,15 +368,15 @@ selectors:
     | selector selectors {}
 
 set:
-    "{" elements "}" {}
+    "{" elements "}" { $$ = new Set($2); }
 
 elements:
-    element {}
-    | element "," elements {}
+    element { $$ = new Elements($1); }
+    | element "," elements {$$ = new Elements($1, $3); }
 
 element:
-    expression {}
-    | expression ".." expression
+    expression { $$ = new SingleElement($1); }
+    | expression ".." expression { $$ = new Range($1, $3); }
 
 ExpList:
     expression {}
