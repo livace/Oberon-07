@@ -61,6 +61,13 @@
     #include <parser/ast/identifier_list.h>
     #include <parser/ast/procedure_type.h>
     #include <parser/ast/variable_declaration_list.h>
+    #include <parser/ast/const_declaration_list.h>
+    #include <parser/ast/declaration_sequence.h>
+    #include <parser/ast/import.h>
+    #include <parser/ast/import_list.h>
+    #include <parser/ast/import_sequence.h>
+    #include <parser/ast/procedure_declaration_list.h>
+    #include <parser/ast/type_declaration_list.h>
 
     class Scanner;
     class Driver;
@@ -190,6 +197,13 @@
 %nterm <ProcedureType*> ProcedureType
 %nterm <VariableDeclaration*> VariableDeclaration
 %nterm <VariableDeclarationList*> VariableDeclarationList
+%nterm <ConstDeclarationList*> ConstDeclarationList
+%nterm <DeclarationSequence*> DeclarationSequence
+%nterm <Import*> import
+%nterm <ImportList*> ImportList
+%nterm <ImportSequence*> ImportSequence
+%nterm <ProcedureDeclarationList*> ProcedureDeclarationList
+%nterm <TypeDeclarationList*> TypeDeclarationList
 
 %printer { yyo << $$; } <*>;
 
@@ -379,8 +393,8 @@ ProcedureCall:
     | designator ActualParameters {}
 
 StatementSequence:
-    | statement {}
-    | statement ";" StatementSequence {}
+    statement {}
+    | StatementSequence ";" statement {}
 
 IfStatement:
     "IF" expression "THEN" StatementSequence ElsifList "ELSE" StatementSequence "END" {}
@@ -446,37 +460,68 @@ ProcedureBody:
     | DeclarationSequence "END" {}
 
 DeclarationSequence:
-    | VAR VariableDeclarationList
-    | "TYPE" TypeDeclarations
-    | "CONST" ConstDeclarations
-    | "TYPE" TypeDeclarations VAR VariableDeclarationList
-    | "CONST" ConstDeclarations VAR VariableDeclarationList
-    | "CONST" ConstDeclarations "TYPE" TypeDeclarations
-    | "CONST" ConstDeclarations "TYPE" TypeDeclarations VAR VariableDeclarationList
-    | ProcedureDeclarations
-    | VAR VariableDeclarationList ProcedureDeclarations
-    | "TYPE" TypeDeclarations ProcedureDeclarations
-    | "CONST" ConstDeclarations ProcedureDeclarations
-    | "TYPE" TypeDeclarations VAR VariableDeclarationList ProcedureDeclarations
-    | "CONST" ConstDeclarations VAR VariableDeclarationList ProcedureDeclarations
-    | "CONST" ConstDeclarations "TYPE" TypeDeclarations ProcedureDeclarations
-    | "CONST" ConstDeclarations "TYPE" TypeDeclarations VAR VariableDeclarationList ProcedureDeclarations
+    %empty {$$ = new DeclarationSequence(nullptr, nullptr, nullptr, nullptr);}
+    | "VAR" VariableDeclarationList {
+    	$$ = new DeclarationSequence(nullptr, nullptr, $2, nullptr);
+    }
+    | "TYPE" TypeDeclarationList {
+    	$$ = new DeclarationSequence(nullptr, $2, nullptr, nullptr);
+    }
+    | "CONST" ConstDeclarationList {
+    	$$ = new DeclarationSequence($2, nullptr, nullptr, nullptr);
+    }
+    | "TYPE" TypeDeclarationList "VAR" VariableDeclarationList {
+    	$$ = new DeclarationSequence(nullptr, $2, $4, nullptr);
+    }
+    | "CONST" ConstDeclarationList "VAR" VariableDeclarationList {
+    	$$ = new DeclarationSequence($2, nullptr, $4, nullptr);
+    }
+    | "CONST" ConstDeclarationList "TYPE" TypeDeclarationList {
+    	$$ = new DeclarationSequence($2, $4, nullptr, nullptr);
+    }
+    | "CONST" ConstDeclarationList "TYPE" TypeDeclarationList "VAR" VariableDeclarationList {
+    	$$ = new DeclarationSequence($2, $4, $6, nullptr);
+    }
+    | ProcedureDeclarationList {
+    	$$ = new DeclarationSequence(nullptr, nullptr, nullptr, $1);
+    }
+    | "VAR" VariableDeclarationList ProcedureDeclarationList {
+    	$$ = new DeclarationSequence(nullptr, nullptr, $2, $3);
+    }
+    | "TYPE" TypeDeclarationList ProcedureDeclarationList {
+    	$$ = new DeclarationSequence(nullptr, $2, nullptr, $3);
+    }
+    | "CONST" ConstDeclarationList ProcedureDeclarationList {
+    	$$ = new DeclarationSequence($2, nullptr, nullptr, $3);
+    }
+    | "TYPE" TypeDeclarationList "VAR" VariableDeclarationList ProcedureDeclarationList {
+    	$$ = new DeclarationSequence(nullptr, $2, $4, $5);
+    }
+    | "CONST" ConstDeclarationList "VAR" VariableDeclarationList ProcedureDeclarationList {
+    	$$ = new DeclarationSequence($2, nullptr, $4, $5);
+    }
+    | "CONST" ConstDeclarationList "TYPE" TypeDeclarationList ProcedureDeclarationList {
+    	$$ = new DeclarationSequence($2, $4, nullptr, $5);
+    }
+    | "CONST" ConstDeclarationList "TYPE" TypeDeclarationList "VAR" VariableDeclarationList ProcedureDeclarationList {
+    	$$ = new DeclarationSequence($2, $4, $6, $7);
+    }
 
-ConstDeclarations:
-    ConstDeclaration ";" {}
-    | ConstDeclarations ConstDeclaration ";" {}
+ConstDeclarationList:
+    ConstDeclaration ";" {$$ = new ConstDeclarationList($1);}
+    | ConstDeclarationList ConstDeclaration ";" {$1->addConstDeclaration($2); $$ = $1;}
 
 VariableDeclarationList:
     VariableDeclaration ";" {$$ = new VariableDeclarationList($1);}
     | VariableDeclarationList VariableDeclaration ";" {$1->addVariableDeclaration($2); $$ = $1;}
 
-TypeDeclarations:
-    TypeDeclaration ";" {}
-    | TypeDeclarations TypeDeclaration ";" {}
+TypeDeclarationList:
+    TypeDeclaration ";" {$$ = new TypeDeclarationList($1);}
+    | TypeDeclarationList TypeDeclaration ";" {$1->addTypeDeclaration($2); $$ = $1;}
 
-ProcedureDeclarations:
-    ProcedureDeclaration ";" {}
-    | ProcedureDeclarations ProcedureDeclaration ";" {}
+ProcedureDeclarationList:
+    ProcedureDeclaration ";" {$$ = new ProcedureDeclarationList($1);}
+    | ProcedureDeclarationList ProcedureDeclaration ";" {$1->addProcedureDeclaration($2); $$ = $1;}
 
 FormalParameters:
     "(" FPSectionList ")" ":" qualident {$$ = new FormalParameters($2, $5);}
@@ -507,15 +552,15 @@ module:
     | "MODULE" ident ";"  DeclarationSequence "END" ident "." {$$ = new Module();}
 
 ImportList:
-    "IMPORT" imports ";" {}
+    "IMPORT" ImportSequence ";" {$$ = new ImportList($2);}
 
-imports:
-    import {}
-    | import "," imports {}
+ImportSequence:
+    import {$$ = new ImportSequence($1);}
+    | ImportSequence "," import {$1->addImport($3); $$ = $1;}
 
 import:
-    ident {}
-    | ident ":=" ident {}
+    ident {$$ = new Import($1);}
+    | ident ":=" ident {$$ = new Import($1, $3);}
 
 ident:
     "ident" {$$ = new Identifier($1);}

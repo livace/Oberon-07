@@ -7,7 +7,7 @@ MODULE TestOberon0;
   BEGIN
     IF k = 0 THEN i := 0;
       WHILE i < n DO WriteInt(a[i], 5); i := i+1 END ;
-      WriteLn;
+      WriteLn
     ELSE perm(k-1); i := 0;
       WHILE i < k-1 DO
         x := a[i]; a[i] := a[k-1]; a[k-1] := x;

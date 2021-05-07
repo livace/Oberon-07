@@ -228,19 +228,19 @@ class PrintVisitor : public Visitor {
         std::cerr << "+";
     }
 
-    virtual void visit(FormalParameters *formal_parameters) override {
+    void visit(FormalParameters *formal_parameters) override {
         go(formal_parameters->fpSectionList());
         go(formal_parameters->qualident());
     };
 
-    virtual void visit(FormalType *formal_type) override {
+    void visit(FormalType *formal_type) override {
         for (size_t i = 0; i < formal_type->arrayDepth(); ++i) {
             std::cerr << "ARRAY OF ";
         }
         go(formal_type->qualident());
     };
 
-    virtual void visit(FPSection *fp_section) override {
+    void visit(FPSection *fp_section) override {
         if (fp_section->isVariable()) {
             std::cerr << "VAR ";
         }
@@ -249,29 +249,73 @@ class PrintVisitor : public Visitor {
         go(fp_section->formalType());
     };
 
-    virtual void visit(FPSectionList *fp_section_list) override {
+    void visit(FPSectionList *fp_section_list) override {
         for (auto& fp_section : fp_section_list->FPSections()) {
             go(fp_section);
             std::cerr << ";\n";
         }
     };
 
-    virtual void visit(IdentifierList *identifier_list) override {
+    void visit(IdentifierList *identifier_list) override {
         for (auto& identifier : identifier_list->identifiers()) {
             go(identifier);
             std::cerr << ", ";
         }
     };
 
-    virtual void visit(ProcedureType *procedure_type) override {
+    void visit(ProcedureType *procedure_type) override {
         std::cerr << "PROCEDURE ";
         go(procedure_type->formal_parameters());
     };
 
-    virtual void visit(VariableDeclarationList *variable_declaration_list) override {
+    void visit(VariableDeclarationList *variable_declaration_list) override {
         for (auto& variable_declaration : variable_declaration_list->variableDeclarations()) {
             go(variable_declaration);
             std::cerr << ";\n";
         }
     };
+
+    void visit(ConstDeclarationList *const_declaration_list) {
+        for (auto& const_declaration : const_declaration_list->constDeclarations()) {
+            go(const_declaration);
+            std::cerr << ";\n";
+        }
+    }
+
+    void visit(DeclarationSequence *declaration_sequence) {
+        go(declaration_sequence->constDeclarationList());
+        go(declaration_sequence->variableDeclarationList());
+        go(declaration_sequence->typeDeclarationList());
+        go(declaration_sequence->procedureDeclarationList());
+    }
+
+    void visit(Import *import) {
+        go(import->identifier());
+        go(import->alias());
+    }
+
+    void visit(ImportList *import_list) {
+        go(import_list->importSequence());
+    }
+
+    void visit(ImportSequence *import_sequence) {
+        for (auto& import : import_sequence->imports()) {
+            go(import);
+            std::cerr << ";\n";
+        }
+    }
+
+    void visit(ProcedureDeclarationList *procedure_declaration_list) {
+        for (auto& procedure_declaration : procedure_declaration_list->procedureDeclarations()) {
+            go(procedure_declaration);
+            std::cerr << ";\n";
+        }
+    }
+
+    void visit(TypeDeclarationList *type_declaration_list) {
+        for (auto& type_declaration : type_declaration_list->typeDeclarations()) {
+            go(type_declaration);
+            std::cerr << ";\n";
+        }
+    }
 };

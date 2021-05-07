@@ -49,6 +49,13 @@ class FPSectionList;
 class IdentifierList;
 class ProcedureType;
 class VariableDeclarationList;
+class ConstDeclarationList;
+class DeclarationSequence;
+class Import;
+class ImportList;
+class ImportSequence;
+class ProcedureDeclarationList;
+class TypeDeclarationList;
 
 class Visitor {
 public:
@@ -100,4 +107,11 @@ public:
     virtual void visit(IdentifierList *identifier_list) = 0;
     virtual void visit(ProcedureType *procedure_type) = 0;
     virtual void visit(VariableDeclarationList *variable_declaration_list) = 0;
+    virtual void visit(ConstDeclarationList *const_declaration_list) = 0;
+    virtual void visit(DeclarationSequence *declaration_sequence) = 0;
+    virtual void visit(Import *import) = 0;
+    virtual void visit(ImportList *import_list) = 0;
+    virtual void visit(ImportSequence *import_sequence) = 0;
+    virtual void visit(ProcedureDeclarationList *procedure_declaration_list) = 0;
+    virtual void visit(TypeDeclarationList *type_declaration_list) = 0;
 };
