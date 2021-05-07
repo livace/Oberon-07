@@ -3,7 +3,7 @@
 #include "type.h"
 #include "ast.h"
 
-class PointerType : virtual public Ast, public Type {
+class PointerType : public Type {
 public:
     PointerType(Type *type) : type_(type) {}
 

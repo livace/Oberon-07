@@ -27,7 +27,7 @@
     #include <parser/ast/base_type.h>
     #include <parser/ast/field_list.h>
     #include <parser/ast/field_list_sequence.h>
-    #include <parser/ast/ident_list.h>
+    #include <parser/ast/identdef_list.h>
     #include <parser/ast/integer.h>
     #include <parser/ast/length.h>
     #include <parser/ast/length_list.h>
@@ -53,7 +53,14 @@
     #include <parser/ast/term_operation.h>
     #include <parser/ast/terms.h>
     #include <parser/ast/unary_minus.h>
-    #include <parser/ast/unary_plus.h>    
+    #include <parser/ast/unary_plus.h>
+    #include <parser/ast/formal_parameters.h>
+    #include <parser/ast/formal_type.h>
+    #include <parser/ast/fp_section.h>
+    #include <parser/ast/fp_section_list.h>
+    #include <parser/ast/identifier_list.h>
+    #include <parser/ast/procedure_type.h>
+    #include <parser/ast/variable_declaration_list.h>
 
     class Scanner;
     class Driver;
@@ -162,7 +169,7 @@
 %nterm <BaseType*> BaseType
 %nterm <FieldList*> FieldList
 %nterm <FieldListSequence*> FieldListSequence
-%nterm <IdentList*> IdentList
+%nterm <IdentDefList*> IdentDefList
 %nterm <Length*> length
 %nterm <LengthList*> LengthList
 %nterm <PointerType*> PointerType
@@ -175,6 +182,14 @@
 %nterm <Terms*> terms
 %nterm <Term*> term 
 %nterm <AddOperator*> AddOperator
+%nterm <FormalParameters*> FormalParameters
+%nterm <FormalType*> FormalType
+%nterm <FPSection*> FPSection
+%nterm <FPSectionList*> FPSectionList
+%nterm <IdentifierList*> IdentifierList
+%nterm <ProcedureType*> ProcedureType
+%nterm <VariableDeclaration*> VariableDeclaration
+%nterm <VariableDeclarationList*> VariableDeclarationList
 
 %printer { yyo << $$; } <*>;
 
@@ -221,7 +236,7 @@ type:
     | ArrayType {$$ = $1;}
     | RecordType {$$ = $1;}
     | PointerType {$$ = $1;}
-    | ProcedureType {} // TODO: Add
+    | ProcedureType {$$ = $1;}
 
 ArrayType:
     "ARRAY" LengthList "OF" type {$$ = new ArrayType($2, $4);}
@@ -247,21 +262,21 @@ FieldListSequence:
     | FieldListSequence ";" FieldList {$1->addFieldList($3);}
 
 FieldList:
-    IdentList ":" type {$$ = new FieldList($1, $3);}
+    IdentDefList ":" type {$$ = new FieldList($1, $3);}
 
-IdentList:
-    identdef {$$ = new IdentList($1);}
-    | IdentList "," identdef {$1->addIdentDef($3);}
+IdentDefList:
+    identdef {$$ = new IdentDefList($1);}
+    | IdentDefList "," identdef {$1->addIdentDef($3); $$ = $1;}
 
 PointerType:
     "POINTER" "TO" type {$$ = new PointerType($3);}
 
 ProcedureType:
-    PROCEDURE {}
-    | PROCEDURE FormalParameters {}
+    PROCEDURE {$$ = new ProcedureType(nullptr);}
+    | PROCEDURE FormalParameters {$$ = new ProcedureType($2);}
 
 VariableDeclaration:
-    IdentList ":" type
+    IdentDefList ":" type {$$ = new VariableDeclaration($1, $3);}
 
 expression:
     SimpleExpression {$$ = new Expression();}
@@ -421,8 +436,8 @@ ProcedureDeclaration:
     }
 
 ProcedureHeading:
-    PROCEDURE identdef { $$ = new ProcedureHeading(); }
-    | PROCEDURE identdef FormalParameters { $$ = new ProcedureHeading(); }
+    PROCEDURE identdef { $$ = new ProcedureHeading($2, nullptr); }
+    | PROCEDURE identdef FormalParameters { $$ = new ProcedureHeading($2, $3); }
 
 ProcedureBody:
     DeclarationSequence "BEGIN" StatementSequence "RETURN" expression "END" {}
@@ -431,29 +446,29 @@ ProcedureBody:
     | DeclarationSequence "END" {}
 
 DeclarationSequence:
-    | VAR VariableDeclarations
+    | VAR VariableDeclarationList
     | "TYPE" TypeDeclarations
     | "CONST" ConstDeclarations
-    | "TYPE" TypeDeclarations VAR VariableDeclarations
-    | "CONST" ConstDeclarations VAR VariableDeclarations
+    | "TYPE" TypeDeclarations VAR VariableDeclarationList
+    | "CONST" ConstDeclarations VAR VariableDeclarationList
     | "CONST" ConstDeclarations "TYPE" TypeDeclarations
-    | "CONST" ConstDeclarations "TYPE" TypeDeclarations VAR VariableDeclarations
+    | "CONST" ConstDeclarations "TYPE" TypeDeclarations VAR VariableDeclarationList
     | ProcedureDeclarations
-    | VAR VariableDeclarations ProcedureDeclarations
+    | VAR VariableDeclarationList ProcedureDeclarations
     | "TYPE" TypeDeclarations ProcedureDeclarations
     | "CONST" ConstDeclarations ProcedureDeclarations
-    | "TYPE" TypeDeclarations VAR VariableDeclarations ProcedureDeclarations
-    | "CONST" ConstDeclarations VAR VariableDeclarations ProcedureDeclarations
+    | "TYPE" TypeDeclarations VAR VariableDeclarationList ProcedureDeclarations
+    | "CONST" ConstDeclarations VAR VariableDeclarationList ProcedureDeclarations
     | "CONST" ConstDeclarations "TYPE" TypeDeclarations ProcedureDeclarations
-    | "CONST" ConstDeclarations "TYPE" TypeDeclarations VAR VariableDeclarations ProcedureDeclarations
+    | "CONST" ConstDeclarations "TYPE" TypeDeclarations VAR VariableDeclarationList ProcedureDeclarations
 
 ConstDeclarations:
     ConstDeclaration ";" {}
     | ConstDeclarations ConstDeclaration ";" {}
 
-VariableDeclarations:
-    VariableDeclaration ";" {}
-    | VariableDeclarations VariableDeclaration ";" {}
+VariableDeclarationList:
+    VariableDeclaration ";" {$$ = new VariableDeclarationList($1);}
+    | VariableDeclarationList VariableDeclaration ";" {$1->addVariableDeclaration($2); $$ = $1;}
 
 TypeDeclarations:
     TypeDeclaration ";" {}
@@ -464,26 +479,26 @@ ProcedureDeclarations:
     | ProcedureDeclarations ProcedureDeclaration ";" {}
 
 FormalParameters:
-    "(" FPSections ")" ":" qualident {}
-    | "(" ")" ":" qualident {}
-    | "(" FPSections ")" {}
-    | "(" ")" {}
+    "(" FPSectionList ")" ":" qualident {$$ = new FormalParameters($2, $5);}
+    | "(" ")" ":" qualident {$$ = new FormalParameters(nullptr, $4);}
+    | "(" FPSectionList ")" {$$ = new FormalParameters($2, nullptr);}
+    | "(" ")" {$$ = new FormalParameters(nullptr, nullptr);}
 
-FPSections:
-     FPSection {}
-     | FPSection ";" FPSections {}
+FPSectionList:
+     FPSection {$$ = new FPSectionList($1);}
+     | FPSectionList ";" FPSection {$1->addFPSection($3); $$ = $1;}
 
 FPSection:
-    VAR idents ":" FormalType {}
-    | idents ":" FormalType {}
+    "VAR" IdentifierList ":" FormalType {$$ = new FPSection(true /*is_variable*/, $2, $4);}
+    | IdentifierList ":" FormalType {$$ = new FPSection(false /*is_variable*/, $1, $3);}
 
-idents:
-    ident {}
-    | ident "," idents {}
+IdentifierList:
+    ident {$$ = new IdentifierList($1);}
+    | IdentifierList "," ident {$1->addIdentifier($3); $$ = $1;}
 
 FormalType:
-    qualident {}
-    | "ARRAY" "OF" FormalType {}
+    qualident {$$ = new FormalType($1);}
+    | "ARRAY" "OF" FormalType {$3->incArrayDepth(); $$ = $3;}
 
 module:
     "MODULE" ident ";"  ImportList DeclarationSequence "BEGIN" StatementSequence "END" ident "." {$$ = new Module();}

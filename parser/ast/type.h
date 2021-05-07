@@ -4,7 +4,7 @@
 
 #include "ast.h"
 
-class Type : virtual public Ast {
+class Type : public Ast {
 public:
     void accept(Visitor &visitor) override {
         visitor.visit(this);

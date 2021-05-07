@@ -4,7 +4,7 @@
 #include "type.h"
 #include "ast.h"
 
-class BaseType : virtual public Ast, public Type {
+class BaseType : public Type {
 public:
     BaseType(Qualident *qualident) : qualident_(qualident) {}
 

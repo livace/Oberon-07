@@ -4,7 +4,7 @@
 #include "type.h"
 #include "ast.h"
 
-class ArrayType : virtual public Ast, public Type {
+class ArrayType : public Type {
 public:
     ArrayType(LengthList *lengths, Type *type) : lengths_(lengths), type_(type) {}
 

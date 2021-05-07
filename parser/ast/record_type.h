@@ -4,7 +4,7 @@
 #include "field_list_sequence.h"
 #include "ast.h"
 
-class RecordType : virtual public Ast, public Type {
+class RecordType : public Type {
 public:
     RecordType(BaseType *base_type, FieldListSequence *field_list_sequence)
         : base_type_(base_type)

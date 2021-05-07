@@ -5,9 +5,9 @@
 
 #include <vector>
 
-class IdentList : public Ast {
+class IdentDefList : public Ast {
 public:
-    IdentList(IdentDef *identdef) {
+    IdentDefList(IdentDef *identdef) {
         identdefs_.push_back(identdef);
     }
 

@@ -1,27 +1,28 @@
 #pragma once
 
-#include "identifier.h"
+#include "ast.h"
+#include "identdef_list.h"
 #include "type.h"
 
-#include "ast.h"
+#include <vector>
 
 class VariableDeclaration : public Ast {
 public:
-    VariableDeclaration(Identifier *identifier, Type *type) : identifier_(identifier), type_(type) {}
+    VariableDeclaration(IdentDefList *identdef_list, Type *type) : ident_list_(identdef_list), type_(type) {}
 
-    Identifier *identifier() {
-        return identifier_;
+    void accept(Visitor &visitor) {
+        visitor.visit(this);
+    }
+
+    IdentDefList *identList() const {
+        return ident_list_;
     }
 
     Type *type() {
         return type_;
     }
 
-    void accept(Visitor &visitor) override {
-        visitor.visit(this);
-    }
-
 private:
-    Identifier *identifier_;
+    IdentDefList *ident_list_;
     Type *type_;
 };
