@@ -318,4 +318,25 @@ class PrintVisitor : public Visitor {
             std::cerr << ";\n";
         }
     }
+
+    void visit(NumberFactor* number_factor) override {
+        go(number_factor->number());    
+    }
+
+    void visit(StringFactor* string_factor) override {
+        go(string_factor->string());    
+        
+    }
+
+    void visit(NilFactor* nil_factor) override {
+        std::cerr << "NIL";   
+    }
+
+    void visit(TrueFactor* true_factor) override {
+        std::cerr << "TRUE";   
+    }
+
+    void visit(FalseFactor* false_factor) override {   
+        std::cerr << "FALSE";   
+    }
 };

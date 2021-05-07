@@ -68,6 +68,12 @@
     #include <parser/ast/import_sequence.h>
     #include <parser/ast/procedure_declaration_list.h>
     #include <parser/ast/type_declaration_list.h>
+    #include <parser/ast/factor.h>
+    #include <parser/ast/number_factor.h>
+    #include <parser/ast/string_factor.h>
+    #include <parser/ast/nil_factor.h>
+    #include <parser/ast/true_factor.h>
+    #include <parser/ast/false_factor.h>
 
     class Scanner;
     class Driver;
@@ -204,6 +210,7 @@
 %nterm <ImportSequence*> ImportSequence
 %nterm <ProcedureDeclarationList*> ProcedureDeclarationList
 %nterm <TypeDeclarationList*> TypeDeclarationList
+%nterm <Factor*> factor
 
 %printer { yyo << $$; } <*>;
 
@@ -332,11 +339,11 @@ MulOperator:
     | "&" { $$ = new LogicalConjunction(); }
 
 factor:
-    number {}
-    | string {}
-    | "NIL" {}
-    | "TRUE" {}
-    | "FALSE" {}
+    number { $$ = new NumberFactor($1); }
+    | string { $$ = new StringFactor($1); }
+    | "NIL" { $$ = new NilFactor(); }
+    | "TRUE" { $$ = new TrueFactor(); }
+    | "FALSE" { $$ = new FalseFactor(); }
     | set {}
     | designator {}
     | designator ActualParameters {}

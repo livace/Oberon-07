@@ -56,6 +56,11 @@ class ImportList;
 class ImportSequence;
 class ProcedureDeclarationList;
 class TypeDeclarationList;
+class NumberFactor;
+class StringFactor;
+class NilFactor;
+class TrueFactor;
+class FalseFactor;
 
 class Visitor {
 public:
@@ -114,4 +119,9 @@ public:
     virtual void visit(ImportSequence *import_sequence) = 0;
     virtual void visit(ProcedureDeclarationList *procedure_declaration_list) = 0;
     virtual void visit(TypeDeclarationList *type_declaration_list) = 0;
+    virtual void visit(NumberFactor* number_factor) = 0;
+    virtual void visit(StringFactor* string_factor) = 0;
+    virtual void visit(NilFactor* nil_factor) = 0;
+    virtual void visit(TrueFactor* true_factor) = 0;
+    virtual void visit(FalseFactor* false_factor) = 0;
 };

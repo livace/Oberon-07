@@ -1,9 +1,5 @@
 #pragma once
 
-#include "add_operator.h"
+#include "ast.h"
 
-class BinaryPlus : public AddOperator {
-    void accept(Visitor &visitor) {
-        visitor.visit(this);
-    }    
-}
+class Factor : public Ast {};
