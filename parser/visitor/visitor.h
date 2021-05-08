@@ -71,6 +71,8 @@ class ActualParameters;
 class FieldSelector;
 class ArraySelector;
 class PointerDereference;
+class Selectors;
+class Designator;
 
 class Visitor {
 public:
@@ -144,4 +146,6 @@ public:
     virtual void visit(FieldSelector *field_selector) = 0;
     virtual void visit(ArraySelector *array_selector) = 0;
     virtual void visit(PointerDereference *pointer_dereference) = 0;    
+    virtual void visit(Selectors *selectors) = 0;
+    virtual void visit(Designator *designator) = 0;
 };

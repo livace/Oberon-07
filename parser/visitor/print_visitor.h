@@ -38,6 +38,8 @@
 #include <parser/ast/field_selector.h>
 #include <parser/ast/array_selector.h>
 #include <parser/ast/pointer_dereference.h>
+#include <parser/ast/selectors.h>
+#include <parser/ast/designator.h>
 
 class PrintVisitor : public Visitor {
     template <class T>
@@ -400,4 +402,16 @@ class PrintVisitor : public Visitor {
         std::cerr << "^";
     }   
 
+    void visit(Selectors *selectors) override {
+        go(selectors->selector());
+        if (selectors->selectors()) {
+            std::cerr << " ";
+            go(selectors->selectors());
+        }
+    }
+
+    void visit(Designator *designator) override {
+        go(designator->qualident());
+        go(designator->selectors());
+    }
 };

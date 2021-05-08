@@ -86,6 +86,8 @@
     #include <parser/ast/array_selector.h>
     #include <parser/ast/field_selector.h>
     #include <parser/ast/pointer_dereference.h>
+    #include <parser/ast/selectors.h>
+    #include <parser/ast/designator.h>
 
     class Scanner;
     class Driver;
@@ -229,6 +231,8 @@
 %nterm <ExpList*> ExpList
 %nterm <ActualParameters*> ActualParameters
 %nterm <Selector*> selector
+%nterm <Selectors*> selectors
+%nterm <Designator*> designator
 
 
 %printer { yyo << $$; } <*>;
@@ -370,12 +374,12 @@ factor:
     | "~" factor {}
 
 designator:
-    qualident {}
-    | qualident selectors {}
+    qualident { $$ = new Designator($1); }
+    | qualident selectors { $$ = new Designator($1, $2); }
 
 selectors:
-    selector {}
-    | selector selectors {}
+    selector { $$ = new Selectors($1); }
+    | selector selectors { $$ = new Selectors($1, $2); }
 
 set:
     "{" elements "}" { $$ = new Set($2); }
