@@ -100,6 +100,13 @@
     #include <parser/ast/greater_equal_relation.h>
     #include <parser/ast/is_relation.h>
     #include <parser/ast/in_relation.h>
+    #include <parser/ast/assignment.h>
+    #include <parser/ast/elsif_list.h>
+    #include <parser/ast/if_statement.h>
+    #include <parser/ast/procedure_body.h>
+    #include <parser/ast/procedure_call.h>
+    #include <parser/ast/statement.h>
+    #include <parser/ast/statement_sequence.h>
 
     class Scanner;
     class Driver;
@@ -246,6 +253,13 @@
 %nterm <Selectors*> selectors
 %nterm <Designator*> designator
 %nterm <Relation*> relation
+%nterm <Assignment*> Assignment
+%nterm <ElsifList*> ElsifList
+%nterm <IfStatement*> IfStatement
+%nterm <ProcedureBody*> ProcedureBody
+%nterm <ProcedureCall*> ProcedureCall
+%nterm <Statement*> statement
+%nterm <StatementSequence*> StatementSequence
 
 %printer { yyo << $$; } <*>;
 
@@ -335,8 +349,8 @@ VariableDeclaration:
     IdentDefList ":" type {$$ = new VariableDeclaration($1, $3);}
 
 expression:
-    SimpleExpression {$$ = new Expression();}
-    | SimpleExpression relation SimpleExpression {$$ = new Expression();}
+    SimpleExpression {$$ = new Expression($1, nullptr, nullptr);}
+    | SimpleExpression relation SimpleExpression {$$ = new Expression($1, $2, $3);}
 
 relation:
     "=" { $$ = new EqualRelation(); }
@@ -419,43 +433,51 @@ selector:
 //    | "(" qualident ")" {} // TODO: FIX
 
 statement:
-    assignment {}
-    | ProcedureCall {}
-    | IfStatement {}
+    Assignment {$$ = $1;}
+    | ProcedureCall {$$ = $1;}
+    | IfStatement {$$ = $1;}
     | CaseStatement {}
     | WhileStatement {}
     | RepeatStatement {}
     | ForStatement {}
 
-assignment:
-    designator ":=" expression {}
+Assignment:
+    designator ":=" expression {$$ = new Assignment($1, $3);}
 
 ProcedureCall:
-    designator {}
-    | designator ActualParameters {}
+    designator {$$ = new ProcedureCall($1, nullptr);}
+    | designator ActualParameters {$$ = new ProcedureCall($1, $2);}
 
 StatementSequence:
-    statement {}
-    | StatementSequence ";" statement {}
+    statement {$$ = new StatementSequence($1);}
+    | StatementSequence ";" statement {$1->addStatement($3); $$ = $1;}
 
 IfStatement:
-    "IF" expression "THEN" StatementSequence ElsifList "ELSE" StatementSequence "END" {}
-    | "IF" expression "THEN" StatementSequence ElsifList "END" {}
-    | "IF" expression "THEN" StatementSequence "ELSE" StatementSequence "END" {}
-    | "IF" expression "THEN" StatementSequence "END"
+    "IF" expression "THEN" StatementSequence ElsifList "ELSE" StatementSequence "END" {
+    	$$ = new IfStatement($2, $4, $5, $7);
+    }
+    | "IF" expression "THEN" StatementSequence ElsifList "END" {
+    	$$ = new IfStatement($2, $4, $5, nullptr);
+    }
+    | "IF" expression "THEN" StatementSequence "ELSE" StatementSequence "END" {
+    	$$ = new IfStatement($2, $4, nullptr, $6);
+    }
+    | "IF" expression "THEN" StatementSequence "END" {
+    	$$ = new IfStatement($2, $4, nullptr, nullptr);
+    }
 
 ElsifList:
-    "ELSIF" expression "THEN" StatementSequence {}
-    | "ELSIF" expression "THEN" StatementSequence ElsifList {}
+    "ELSIF" expression "THEN" StatementSequence {$$ = new ElsifList($2, $4, nullptr);}
+    | "ELSIF" expression "THEN" StatementSequence ElsifList {$$ = new ElsifList($2, $4, $5);}
 
 CaseStatement:
-    "CASE" expression "OF" cases "END"
+    "CASE" expression "OF" CaseList "END"
 
-cases:
-    case {}
-    | case "|" cases {}
+CaseList:
+    Case {}
+    | CaseList "|" Case {}
 
-case:
+Case:
     CaseLabelList ":" StatementSequence {}
 
 CaseLabelList:
@@ -463,10 +485,10 @@ CaseLabelList:
     | LabelRange "," CaseLabelList {}
 
 LabelRange:
-    label {}
-    | label ".." label {}
+    Label {}
+    | Label ".." Label {}
 
-label:
+Label:
     INTEGER {}
     | STRING {}
     | qualident {}
@@ -488,7 +510,7 @@ ForStatement:
 
 ProcedureDeclaration:
     ProcedureHeading ";" ProcedureBody ident {
-        $$ = new ProcedureDeclaration($1);
+        $$ = new ProcedureDeclaration($1, $3, $4);
     }
 
 ProcedureHeading:
@@ -496,10 +518,16 @@ ProcedureHeading:
     | PROCEDURE identdef FormalParameters { $$ = new ProcedureHeading($2, $3); }
 
 ProcedureBody:
-    DeclarationSequence "BEGIN" StatementSequence "RETURN" expression "END" {}
-    | DeclarationSequence "BEGIN" StatementSequence "END" {}
-    | DeclarationSequence "RETURN" expression "END" {}
-    | DeclarationSequence "END" {}
+    DeclarationSequence "BEGIN" StatementSequence "RETURN" expression "END" {
+    	$$ = new ProcedureBody($1, $3, $5);
+    }
+    | DeclarationSequence "BEGIN" StatementSequence "END" {
+    	$$ = new ProcedureBody($1, $3, nullptr);
+    }
+    | DeclarationSequence "RETURN" expression "END" {
+    	$$ = new ProcedureBody($1, nullptr, $3);
+    }
+    | DeclarationSequence "END" {$$ = new ProcedureBody($1, nullptr, nullptr);}
 
 DeclarationSequence:
     %empty {$$ = new DeclarationSequence(nullptr, nullptr, nullptr, nullptr);}

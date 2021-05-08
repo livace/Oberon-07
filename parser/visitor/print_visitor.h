@@ -464,4 +464,33 @@ class PrintVisitor : public Visitor {
     void visit(IsRelation *is_relation) override {
         std::cerr << "IS";
     }
+
+    void visit(Assignment *assignment) override {
+
+    }
+
+    void visit(ElsifList *elsif_list) override {
+
+    }
+
+    void visit(IfStatement *if_statement) override {
+
+    }
+
+    void visit(ProcedureBody *procedure_body) override {
+
+    }
+
+    void visit(ProcedureCall *procedure_call) override {
+
+    }
+
+    void visit(Statement *statement) override {
+
+    }
+
+    void visit(StatementSequence *statement_sequence) override {
+
+    }
+
 };

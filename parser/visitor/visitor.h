@@ -84,6 +84,14 @@ class GreaterRelation;
 class GreaterEqualRelation;
 class InRelation;
 class IsRelation;
+class Assignment;
+class ElsifList;
+class IfStatement;
+class ProcedureBody;
+class ProcedureCall;
+class Statement;
+class StatementSequence;
+
 
 
 class Visitor {
@@ -170,5 +178,12 @@ public:
     virtual void visit(GreaterRelation *greater_relation) = 0;  
     virtual void visit(GreaterEqualRelation *greater_equal_relation) = 0;   
     virtual void visit(InRelation *in_relation) = 0;    
-    virtual void visit(IsRelation *is_relation) = 0;    
+    virtual void visit(IsRelation *is_relation) = 0;
+    virtual void visit(Assignment *assignment) = 0;
+    virtual void visit(ElsifList *elsif_list) = 0;
+    virtual void visit(IfStatement *if_statement) = 0;
+    virtual void visit(ProcedureBody *procedure_body) = 0;
+    virtual void visit(ProcedureCall *procedure_call) = 0;
+    virtual void visit(Statement *statement) = 0;
+    virtual void visit(StatementSequence *statement_sequence) = 0;
 };
