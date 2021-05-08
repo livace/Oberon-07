@@ -91,6 +91,7 @@
     #include <parser/ast/designator_factor.h>
     #include <parser/ast/expression_factor.h>
     #include <parser/ast/negation_factor.h>
+    #include <parser/ast/relation.h>
 
     class Scanner;
     class Driver;
@@ -236,7 +237,7 @@
 %nterm <Selector*> selector
 %nterm <Selectors*> selectors
 %nterm <Designator*> designator
-
+%nterm <Relation*> relation
 
 %printer { yyo << $$; } <*>;
 
