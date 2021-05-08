@@ -34,6 +34,7 @@
 #include <parser/ast/terms.h>
 #include <parser/ast/unary_minus.h>
 #include <parser/ast/unary_plus.h>
+#include <parser/ast/exp_list.h>
 
 class PrintVisitor : public Visitor {
     template <class T>
@@ -366,4 +367,12 @@ class PrintVisitor : public Visitor {
     void visit(SingleElement* single_element) override {
         go(single_element->expression());
     }
+
+    void visit(ExpList* exp_list) override {
+        go(exp_list->expression());
+        if (exp_list->expList()) {
+            std::cerr << ", ";
+            go(exp_list->expList());
+        }
+    } 
 };

@@ -80,6 +80,7 @@
     #include <parser/ast/set.h>
     #include <parser/ast/set_factor.h>
     #include <parser/ast/single_element.h>
+    #include <parser/ast/exp_list.h>
 
     class Scanner;
     class Driver;
@@ -220,6 +221,7 @@
 %nterm <Set*> set
 %nterm <Elements*> elements
 %nterm <Element*> element
+%nterm <ExpList*> ExpList
 
 %printer { yyo << $$; } <*>;
 
@@ -379,8 +381,8 @@ element:
     | expression ".." expression { $$ = new Range($1, $3); }
 
 ExpList:
-    expression {}
-    | expression "," ExpList {}
+    expression { $$ = new ExpList($1); }
+    | expression "," ExpList { $$ = new ExpList($1, $3); }
 
 ActualParameters:
     "(" ")" {}

@@ -66,6 +66,7 @@ class Range;
 class Set;
 class SetFactor;
 class SingleElement;
+class ExpList;
 
 class Visitor {
 public:
@@ -134,4 +135,5 @@ public:
     virtual void visit(Set* set) = 0; 
     virtual void visit(SetFactor* set_factor) = 0; 
     virtual void visit(SingleElement* single_element) = 0; 
+    virtual void visit(ExpList* exp_list) = 0; 
 };
