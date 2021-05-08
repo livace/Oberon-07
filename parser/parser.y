@@ -92,6 +92,14 @@
     #include <parser/ast/expression_factor.h>
     #include <parser/ast/negation_factor.h>
     #include <parser/ast/relation.h>
+    #include <parser/ast/equal_relation.h>
+    #include <parser/ast/not_equal_relation.h>
+    #include <parser/ast/less_relation.h>
+    #include <parser/ast/less_equal_relation.h>
+    #include <parser/ast/greater_relation.h>
+    #include <parser/ast/greater_equal_relation.h>
+    #include <parser/ast/is_relation.h>
+    #include <parser/ast/in_relation.h>
 
     class Scanner;
     class Driver;
@@ -331,14 +339,14 @@ expression:
     | SimpleExpression relation SimpleExpression {$$ = new Expression();}
 
 relation:
-    "=" {}
-    | "#" {}
-    | "<" {}
-    | "<=" {}
-    | ">" {}
-    | ">=" {}
-    | "IN" {}
-    | "IS" {}
+    "=" { $$ = new EqualRelation(); }
+    | "#" { $$ = new NotEqualRelation(); }
+    | "<" { $$ = new LessRelation(); }
+    | "<=" { $$ = new LessEqualRelation(); }
+    | ">" { $$ = new GreaterRelation(); }
+    | ">=" { $$ = new GreaterEqualRelation(); }
+    | "IN" { $$ = new InRelation(); }
+    | "IS" { $$ = new IsRelation(); }
 
 SimpleExpression:
     terms { $$ = new SimpleExpression($1); }

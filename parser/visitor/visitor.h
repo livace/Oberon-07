@@ -76,6 +76,15 @@ class Designator;
 class DesignatorFactor;
 class ExpressionFactor;
 class NegationFactor;
+class EqualRelation;
+class NotEqualRelation;
+class LessRelation;
+class LessEqualRelation;
+class GreaterRelation;
+class GreaterEqualRelation;
+class InRelation;
+class IsRelation;
+
 
 class Visitor {
 public:
@@ -154,4 +163,12 @@ public:
     virtual void visit(DesignatorFactor *designator_factor) = 0;
     virtual void visit(ExpressionFactor *expression_factor) = 0;
     virtual void visit(NegationFactor *negation_factor) = 0;
+    virtual void visit(EqualRelation *equal_relation) = 0;
+    virtual void visit(NotEqualRelation *not_equal_relation) = 0;
+    virtual void visit(LessRelation *less_relation) = 0;
+    virtual void visit(LessEqualRelation *less_equal_relation) = 0; 
+    virtual void visit(GreaterRelation *greater_relation) = 0;  
+    virtual void visit(GreaterEqualRelation *greater_equal_relation) = 0;   
+    virtual void visit(InRelation *in_relation) = 0;    
+    virtual void visit(IsRelation *is_relation) = 0;    
 };

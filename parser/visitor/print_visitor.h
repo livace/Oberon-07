@@ -432,4 +432,36 @@ class PrintVisitor : public Visitor {
         go(designator_factor->designator());
         go(designator_factor->actualParameters());
     }
+
+    void visit(EqualRelation *equal_relation) override {
+        std::cerr << "=";
+    }
+
+    void visit(NotEqualRelation *not_equal_relation) override {
+        std::cerr << "!=";
+    }
+
+    void visit(LessRelation *less_relation) override {
+        std::cerr << "<";
+    }
+
+    void visit(LessEqualRelation *less_equal_relation) override {
+        std::cerr << "<=";
+    }
+
+    void visit(GreaterRelation *greater_relation) override {
+        std::cerr << ">";
+    }
+
+    void visit(GreaterEqualRelation *greater_equal_relation) override {
+        std::cerr << ">=";
+    }
+
+    void visit(InRelation *in_relation) override {
+        std::cerr << "IN";
+    }
+
+    void visit(IsRelation *is_relation) override {
+        std::cerr << "IS";
+    }
 };
