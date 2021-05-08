@@ -40,6 +40,8 @@
 #include <parser/ast/pointer_dereference.h>
 #include <parser/ast/selectors.h>
 #include <parser/ast/designator.h>
+#include <parser/ast/expression_factor.h>
+#include <parser/ast/negation_factor.h>
 
 class PrintVisitor : public Visitor {
     template <class T>
@@ -413,5 +415,21 @@ class PrintVisitor : public Visitor {
     void visit(Designator *designator) override {
         go(designator->qualident());
         go(designator->selectors());
+    }
+
+    void visit(ExpressionFactor *expression_factor) override {
+        std::cerr << "(";
+        go(expression_factor->expression());
+        std::cerr << ")";
+    }
+
+    void visit(NegationFactor *negation_factor) override {
+        std::cerr << "~";
+        go(negation_factor->factor());
+    }
+
+    void visit(DesignatorFactor *designator_factor) override {
+        go(designator_factor->designator());
+        go(designator_factor->actualParameters());
     }
 };

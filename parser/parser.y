@@ -88,6 +88,9 @@
     #include <parser/ast/pointer_dereference.h>
     #include <parser/ast/selectors.h>
     #include <parser/ast/designator.h>
+    #include <parser/ast/designator_factor.h>
+    #include <parser/ast/expression_factor.h>
+    #include <parser/ast/negation_factor.h>
 
     class Scanner;
     class Driver;
@@ -368,10 +371,10 @@ factor:
     | "TRUE" { $$ = new TrueFactor(); }
     | "FALSE" { $$ = new FalseFactor(); }
     | set { $$ = new SetFactor($1); }
-    | designator {}
-    | designator ActualParameters {}
-    | "(" expression ")" {}
-    | "~" factor {}
+    | designator { $$ = new DesignatorFactor($1); }
+    | designator ActualParameters { $$ = new DesignatorFactor($1, $2); }
+    | "(" expression ")" { $$ = new ExpressionFactor($2); }
+    | "~" factor { $$ = new NegationFactor($2); }
 
 designator:
     qualident { $$ = new Designator($1); }
