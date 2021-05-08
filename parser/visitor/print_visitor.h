@@ -375,4 +375,10 @@ class PrintVisitor : public Visitor {
             go(exp_list->expList());
         }
     } 
+
+    void visit(ActualParameters* actual_parameters) {
+        std::cerr << "(";
+        go(actual_parameters->expList());
+        std::cerr << ")";
+    }
 };

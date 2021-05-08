@@ -67,6 +67,7 @@ class Set;
 class SetFactor;
 class SingleElement;
 class ExpList;
+class ActualParameters;
 
 class Visitor {
 public:
@@ -136,4 +137,5 @@ public:
     virtual void visit(SetFactor* set_factor) = 0; 
     virtual void visit(SingleElement* single_element) = 0; 
     virtual void visit(ExpList* exp_list) = 0; 
+    virtual void visit(ActualParameters* actual_parameters) = 0; 
 };
