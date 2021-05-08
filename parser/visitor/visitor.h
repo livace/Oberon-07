@@ -68,6 +68,9 @@ class SetFactor;
 class SingleElement;
 class ExpList;
 class ActualParameters;
+class FieldSelector;
+class ArraySelector;
+class PointerDereference;
 
 class Visitor {
 public:
@@ -138,4 +141,7 @@ public:
     virtual void visit(SingleElement* single_element) = 0; 
     virtual void visit(ExpList* exp_list) = 0; 
     virtual void visit(ActualParameters* actual_parameters) = 0; 
+    virtual void visit(FieldSelector *field_selector) = 0;
+    virtual void visit(ArraySelector *array_selector) = 0;
+    virtual void visit(PointerDereference *pointer_dereference) = 0;    
 };

@@ -82,6 +82,10 @@
     #include <parser/ast/single_element.h>
     #include <parser/ast/exp_list.h>
     #include <parser/ast/actual_parameters.h>
+    #include <parser/ast/selector.h>
+    #include <parser/ast/array_selector.h>
+    #include <parser/ast/field_selector.h>
+    #include <parser/ast/pointer_dereference.h>
 
     class Scanner;
     class Driver;
@@ -224,6 +228,8 @@
 %nterm <Element*> element
 %nterm <ExpList*> ExpList
 %nterm <ActualParameters*> ActualParameters
+%nterm <Selector*> selector
+
 
 %printer { yyo << $$; } <*>;
 
@@ -391,9 +397,9 @@ ActualParameters:
     | "(" ExpList ")" { $$ = new ActualParameters($2); }
 
 selector:
-    "." ident {}
-    | "[" ExpList "]" {}
-    | "^" {}
+    "." ident { $$ = new FieldSelector($2); }
+    | "[" ExpList "]" { $$ = new ArraySelector($2); }
+    | "^" { $$ = new PointerDereference(); }
 //    | "(" qualident ")" {} // TODO: FIX
 
 statement:

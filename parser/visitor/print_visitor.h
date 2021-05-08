@@ -35,6 +35,9 @@
 #include <parser/ast/unary_minus.h>
 #include <parser/ast/unary_plus.h>
 #include <parser/ast/exp_list.h>
+#include <parser/ast/field_selector.h>
+#include <parser/ast/array_selector.h>
+#include <parser/ast/pointer_dereference.h>
 
 class PrintVisitor : public Visitor {
     template <class T>
@@ -376,9 +379,25 @@ class PrintVisitor : public Visitor {
         }
     } 
 
-    void visit(ActualParameters* actual_parameters) {
+    void visit(ActualParameters* actual_parameters) override {
         std::cerr << "(";
         go(actual_parameters->expList());
         std::cerr << ")";
     }
+
+    void visit(FieldSelector *field_selector) override {
+        std::cerr << ".";
+        go(field_selector->ident());
+    }
+
+    void visit(ArraySelector *array_selector) override {
+        std::cerr << "[";
+        go(array_selector->exp_list());
+        std::cerr << "]";
+    }
+
+    void visit(PointerDereference *pointer_dereference) override {
+        std::cerr << "^";
+    }   
+
 };
