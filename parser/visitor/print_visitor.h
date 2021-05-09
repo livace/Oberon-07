@@ -76,6 +76,7 @@ class PrintVisitor : public Visitor {
 
     void visit(ProcedureHeading *procedure_heading) override {
         go(procedure_heading->identDef());
+        go(procedure_heading->formalParameters());
     }  
 
     void visit(VariableDeclaration *variable_declaration) override {
@@ -175,7 +176,12 @@ class PrintVisitor : public Visitor {
     }
 
     void visit(IdentDefList *ident_list) {
+        bool first = true;
         for (auto& identdef : ident_list->identdefs()) {
+            if (!first) {
+                std::cerr << ", ";
+            }
+            first = false;
             go(identdef);
         }
     }
@@ -322,16 +328,24 @@ class PrintVisitor : public Visitor {
     };
 
     void visit(FPSectionList *fp_section_list) override {
+        bool first = true;
         for (auto& fp_section : fp_section_list->FPSections()) {
+            if (!first) {
+                std::cerr << ";\n";
+            }
+            first = false;
             go(fp_section);
-            std::cerr << ";\n";
         }
     };
 
     void visit(IdentifierList *identifier_list) override {
+        bool first = true;
         for (auto& identifier : identifier_list->identifiers()) {
+            if (!first) {
+                std::cerr << ", ";
+            }
+            first = false;
             go(identifier);
-            std::cerr << ", ";
         }
     };
 
@@ -341,9 +355,14 @@ class PrintVisitor : public Visitor {
     };
 
     void visit(VariableDeclarationList *variable_declaration_list) override {
+        bool first = true;
         for (auto& variable_declaration : variable_declaration_list->variableDeclarations()) {
+            if (!first) {
+                std::cerr << "\n";
+            }
+            first = false;
             go(variable_declaration);
-            std::cerr << ";\n";
+            std::cerr << ";";
         }
     };
 
@@ -381,11 +400,10 @@ class PrintVisitor : public Visitor {
         }
         
         if (!first) {
-            std::cerr << " ";
+            std::cerr << "\n";
         }
         first = false;
         go(declaration_sequence->procedureDeclarationList());
-    
     }
 
     void visit(Import *import) {
