@@ -399,8 +399,8 @@ AddOperator:
     | "OR" {  $$ = new LogicalDisjunction(); }
 
 term:
-    factor { $$ = new Term(); } // TODO
-    | factor MulOperator term { $$ = new Term(); } // TODO
+    factor { $$ = new Term($1); }
+    | factor MulOperator term { $$ = new Term($1, $2, $3); }
 
 MulOperator:
     "*" { $$ = new Multiplication(); }

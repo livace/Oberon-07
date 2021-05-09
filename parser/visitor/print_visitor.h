@@ -56,17 +56,13 @@ class PrintVisitor : public Visitor {
     }  
 
     void visit(ProcedureDeclaration *procedure_declaration) override {
-        std::cerr << "PROCEDURE";
+        std::cerr << "PROCEDURE ";
         go(procedure_declaration->procedureHeading());
     }
 
     void visit(ProcedureHeading *procedure_heading) override {
-        std::cerr << "<some name>";
+        go(procedure_heading->identDef());
     }  
-
-    void visit(Type *type) override {
-        std::cerr << "<type>";
-    }
 
     void visit(VariableDeclaration *variable_declaration) override {
         go(variable_declaration->identList());
@@ -76,7 +72,10 @@ class PrintVisitor : public Visitor {
 
     void visit(Qualident *qualident) override {
         go(qualident->prefix());
-        go(qualident->identifier());
+        if (qualident->identifier()) {
+            std::cerr << ".";
+            go(qualident->identifier());
+        }
     }
 
     void visit(Module *module) override {
@@ -84,6 +83,7 @@ class PrintVisitor : public Visitor {
 
     void visit(ConstDeclaration *const_declaration) override {
         go(const_declaration->identifier());
+        std::cerr << " = ";
         go(const_declaration->constExpression());
     }
 
@@ -92,10 +92,20 @@ class PrintVisitor : public Visitor {
     }
 
     void visit(Expression *expression) override {
+        go(expression->primary());
+        if (expression->relation()) {
+            std::cerr << " ";
+            go(expression->relation());
+            std::cerr << " ";
+            go(expression->secondary());
+        }
     }
 
     void visit(IdentDef *identdef) override {
-        std::cerr << identdef->identifier() << ", is_exported: " << identdef->isExported();
+        std::cerr << identdef->identifier();
+        if (identdef->isExported()) {
+            std::cerr << " *";
+        }
     }
 
     void visit(Number *number) override {
@@ -164,10 +174,17 @@ class PrintVisitor : public Visitor {
     }
 
     void visit(RecordType *record_type) {
-        std::cerr << "RECORD ";
-        go(record_type->baseType());
-        go(record_type->fieldListSequence());
-        std::cerr << "END";
+        std::cerr << "RECORD";
+        if (record_type->baseType()) {
+            std::cerr << " (";
+            go(record_type->baseType());
+            std::cerr << ")";
+        }
+        if (record_type->fieldListSequence()) {
+            std::cerr << " ";
+            go(record_type->fieldListSequence());
+        }
+        std::cerr << " END";
     }
 
     void visit(TypeDeclaration *type_declaration) {
@@ -217,7 +234,13 @@ class PrintVisitor : public Visitor {
     }
 
     void visit(Term *term) override {
-        std::cerr << "<term>"; // TODO
+        go(term->factor());
+        if (term->mulOperator()) {
+            std::cerr << " ";
+            go(term->mulOperator());
+            std::cerr << " ";
+            go(term->term());
+        }
     }
 
     void visit(TermOperation *term_operation) override {
@@ -237,8 +260,14 @@ class PrintVisitor : public Visitor {
     }
 
     void visit(FormalParameters *formal_parameters) override {
+        std::cerr << "(";
         go(formal_parameters->fpSectionList());
-        go(formal_parameters->qualident());
+        std::cerr << ")";
+        
+        if (formal_parameters->qualident()) {
+            std::cerr << ":";
+            go(formal_parameters->qualident());
+        }
     };
 
     void visit(FormalType *formal_type) override {
@@ -292,8 +321,11 @@ class PrintVisitor : public Visitor {
 
     void visit(DeclarationSequence *declaration_sequence) {
         go(declaration_sequence->constDeclarationList());
+        std::cerr << " ";
         go(declaration_sequence->variableDeclarationList());
+        std::cerr << " ";
         go(declaration_sequence->typeDeclarationList());
+        std::cerr << " ";
         go(declaration_sequence->procedureDeclarationList());
     }
 
@@ -466,31 +498,61 @@ class PrintVisitor : public Visitor {
     }
 
     void visit(Assignment *assignment) override {
-
+        go(assignment->designator());
+        std::cerr << " = ";
+        go(assignment->expression());
     }
 
     void visit(ElsifList *elsif_list) override {
-
+        std::cerr << "ELSIF ";
+        go(elsif_list->expression());
+        std::cerr << "\nTHEN ";
+        go(elsif_list->statementSequence());
+        go(elsif_list->elsifList());
     }
 
     void visit(IfStatement *if_statement) override {
-
+        std::cerr << "IF ";
+        go(if_statement->expression());
+        std::cerr << "\nTHEN\n";
+        go(if_statement->thenStatements());
+        if (if_statement->elsifList()) {
+            std::cerr << "\n";
+            go(if_statement->elsifList());
+            std::cerr << "\n";
+        }
+        if (if_statement->elseStatements()) {
+            std::cerr << "\nELSE\n";
+            go(if_statement->elseStatements());
+        }
+        std::cerr << "\nEND";
     }
 
     void visit(ProcedureBody *procedure_body) override {
-
+        go(procedure_body->declarationSequence());
+        if (procedure_body->body()) {
+            std::cerr << "BEGIN\n";
+            go(procedure_body->body());
+        }
+        if (procedure_body->returnExpression()) {
+            std::cerr << "RETURN ";
+            go(procedure_body->returnExpression());
+        }
+        std::cerr << "\nEND";
     }
 
     void visit(ProcedureCall *procedure_call) override {
-
-    }
-
-    void visit(Statement *statement) override {
-
+        go(procedure_call->designator());
+        if (procedure_call->actualParameters()) {
+            go(procedure_call->actualParameters());
+        }
     }
 
     void visit(StatementSequence *statement_sequence) override {
-
+        for (Statement* statement : statement_sequence->statements()) {
+            go(statement);
+            std::cerr << "\n";
+        }
     }
 
     void visit(Case *case_node) override {

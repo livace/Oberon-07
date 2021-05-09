@@ -110,7 +110,6 @@ public:
     virtual void visit(Identifier *identifier) = 0;
     virtual void visit(ProcedureDeclaration *procedure_declaration) = 0; 
     virtual void visit(ProcedureHeading *procedure_heading) = 0; 
-    virtual void visit(Type *type) = 0;
     virtual void visit(VariableDeclaration *variable_declaration) = 0;
     virtual void visit(Qualident *qualident) = 0;
     virtual void visit(Root *root) = 0;
@@ -195,7 +194,6 @@ public:
     virtual void visit(IfStatement *if_statement) = 0;
     virtual void visit(ProcedureBody *procedure_body) = 0;
     virtual void visit(ProcedureCall *procedure_call) = 0;
-    virtual void visit(Statement *statement) = 0;
     virtual void visit(StatementSequence *statement_sequence) = 0;
     virtual void visit(Case *case_node) = 0;
     virtual void visit(CaseLabelList *case_label_list) = 0;
