@@ -493,4 +493,55 @@ class PrintVisitor : public Visitor {
 
     }
 
+    void visit(Case *case_node) override {
+
+    }
+
+    void visit(CaseLabelList *case_label_list) override {
+
+    }
+
+    void visit(CaseList *case_list) override {
+
+    }
+
+    void visit(CaseStatement *case_statement) override {
+
+    }
+
+    void visit(ElsifWhileList *elsif_while_list) override {
+
+    }
+
+    void visit(ForStatement *for_statement) override {
+
+    }
+
+    void visit(IntegerLabel *integer_label) override {
+
+    }
+
+    void visit(Label *label) override {
+
+    }
+
+    void visit(LabelRange *label_range) override {
+
+    }
+
+    void visit(QualidentLabel *qualident_label) override {
+
+    }
+
+    void visit(RepeatStatement *repeat_statement) override {
+
+    }
+
+    void visit(StringLabel *string_label) override {
+
+    }
+
+    void visit(WhileStatement *while_statement) override {
+
+    }
 };

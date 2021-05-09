@@ -91,8 +91,19 @@ class ProcedureBody;
 class ProcedureCall;
 class Statement;
 class StatementSequence;
-
-
+class Case;
+class CaseLabelList;
+class CaseList;
+class CaseStatement;
+class ElsifWhileList;
+class ForStatement;
+class IntegerLabel;
+class Label;
+class LabelRange;
+class QualidentLabel;
+class RepeatStatement;
+class StringLabel;
+class WhileStatement;
 
 class Visitor {
 public:
@@ -186,4 +197,17 @@ public:
     virtual void visit(ProcedureCall *procedure_call) = 0;
     virtual void visit(Statement *statement) = 0;
     virtual void visit(StatementSequence *statement_sequence) = 0;
+    virtual void visit(Case *case_node) = 0;
+    virtual void visit(CaseLabelList *case_label_list) = 0;
+    virtual void visit(CaseList *case_list) = 0;
+    virtual void visit(CaseStatement *case_statement) = 0;
+    virtual void visit(ElsifWhileList *elsif_while_list) = 0;
+    virtual void visit(ForStatement *for_statement) = 0;
+    virtual void visit(IntegerLabel *integer_label) = 0;
+    virtual void visit(Label *label) = 0;
+    virtual void visit(LabelRange *label_range) = 0;
+    virtual void visit(QualidentLabel *qualident_label) = 0;
+    virtual void visit(RepeatStatement *repeat_statement) = 0;
+    virtual void visit(StringLabel *string_label) = 0;
+    virtual void visit(WhileStatement *while_statement) = 0;
 };

@@ -107,6 +107,19 @@
     #include <parser/ast/procedure_call.h>
     #include <parser/ast/statement.h>
     #include <parser/ast/statement_sequence.h>
+    #include <parser/ast/case.h>
+    #include <parser/ast/case_label_list.h>
+    #include <parser/ast/case_list.h>
+    #include <parser/ast/case_statement.h>
+    #include <parser/ast/elsif_while_list.h>
+    #include <parser/ast/for_statement.h>
+    #include <parser/ast/integer_label.h>
+    #include <parser/ast/label.h>
+    #include <parser/ast/label_range.h>
+    #include <parser/ast/qualident_label.h>
+    #include <parser/ast/repeat_statement.h>
+    #include <parser/ast/string_label.h>
+    #include <parser/ast/while_statement.h>
 
     class Scanner;
     class Driver;
@@ -219,7 +232,6 @@
 %nterm <Length*> length
 %nterm <LengthList*> LengthList
 %nterm <PointerType*> PointerType
-%nterm <QualidentType*> QualidentType
 %nterm <RecordType*> RecordType
 %nterm <Type*> type
 %nterm <TypeDeclaration*> TypeDeclaration
@@ -260,6 +272,16 @@
 %nterm <ProcedureCall*> ProcedureCall
 %nterm <Statement*> statement
 %nterm <StatementSequence*> StatementSequence
+%nterm <Case*> Case
+%nterm <CaseLabelList*> CaseLabelList
+%nterm <CaseList*> CaseList
+%nterm <CaseStatement*> CaseStatement
+%nterm <ElsifWhileList*> ElsifWhileList
+%nterm <ForStatement*> ForStatement
+%nterm <Label*> Label
+%nterm <LabelRange*> LabelRange
+%nterm <RepeatStatement*> RepeatStatement
+%nterm <WhileStatement*> WhileStatement
 
 %printer { yyo << $$; } <*>;
 
@@ -436,10 +458,10 @@ statement:
     Assignment {$$ = $1;}
     | ProcedureCall {$$ = $1;}
     | IfStatement {$$ = $1;}
-    | CaseStatement {}
-    | WhileStatement {}
-    | RepeatStatement {}
-    | ForStatement {}
+    | CaseStatement {$$ = $1;}
+    | WhileStatement {$$ = $1;}
+    | RepeatStatement {$$ = $1;}
+    | ForStatement {$$ = $1;}
 
 Assignment:
     designator ":=" expression {$$ = new Assignment($1, $3);}
@@ -471,42 +493,46 @@ ElsifList:
     | "ELSIF" expression "THEN" StatementSequence ElsifList {$$ = new ElsifList($2, $4, $5);}
 
 CaseStatement:
-    "CASE" expression "OF" CaseList "END"
+    "CASE" expression "OF" CaseList "END" {$$ = new CaseStatement($2, $4);}
 
 CaseList:
-    Case {}
-    | CaseList "|" Case {}
+    Case {$$ = new CaseList($1);}
+    | CaseList "|" Case {$1->addCase($3); $$ = $1;}
 
 Case:
-    CaseLabelList ":" StatementSequence {}
+    CaseLabelList ":" StatementSequence {$$ = new Case($1, $3);}
 
 CaseLabelList:
-    LabelRange {}
-    | LabelRange "," CaseLabelList {}
+    LabelRange {$$ = new CaseLabelList($1);}
+    | CaseLabelList "," LabelRange {$1->addLabelRange($3); $$ = $1;}
 
 LabelRange:
-    Label {}
-    | Label ".." Label {}
+    Label {$$ = new LabelRange($1, $1);}
+    | Label ".." Label {$$ = new LabelRange($1, $3);}
 
 Label:
-    INTEGER {}
-    | STRING {}
-    | qualident {}
+    INTEGER {$$ = new IntegerLabel($1);}
+    | STRING {$$ = new StringLabel($1);}
+    | qualident {$$ = new QualidentLabel($1);}
 
 WhileStatement:
-    "WHILE" expression "DO" StatementSequence "END" {}
-    | "WHILE" expression "DO" StatementSequence ElsifWhileList "END" {}
+    "WHILE" expression "DO" StatementSequence "END" {$$ = new WhileStatement($2, $4, nullptr);}
+    | "WHILE" expression "DO" StatementSequence ElsifWhileList "END" {$$ = new WhileStatement($2, $4, $5);}
 
 ElsifWhileList:
-    "ELSIF" expression "DO" StatementSequence {}
-    | "ELSIF" expression "DO" StatementSequence ElsifWhileList
+    "ELSIF" expression "DO" StatementSequence {$$ = new ElsifWhileList($2, $4, nullptr);}
+    | "ELSIF" expression "DO" StatementSequence ElsifWhileList {$$ = new ElsifWhileList($2, $4, $5);}
 
 RepeatStatement:
-    "REPEAT" StatementSequence "UNTIL" expression {}
+    "REPEAT" StatementSequence "UNTIL" expression {$$ = new RepeatStatement($2, $4);}
 
 ForStatement:
-    "FOR" ident ":=" expression "TO" expression "DO" StatementSequence "END" {}
-    | "FOR" ident ":=" expression "TO" expression "BY" ConstExpression "DO" StatementSequence "END" {}
+    "FOR" ident ":=" expression "TO" expression "DO" StatementSequence "END" {
+    	$$ = new ForStatement($2, $4, $6, nullptr, $8);
+    }
+    | "FOR" ident ":=" expression "TO" expression "BY" ConstExpression "DO" StatementSequence "END" {
+    	$$ = new ForStatement($2, $4, $6, $8, $10);
+    }
 
 ProcedureDeclaration:
     ProcedureHeading ";" ProcedureBody ident {
@@ -616,10 +642,14 @@ FormalType:
     | "ARRAY" "OF" FormalType {$3->incArrayDepth(); $$ = $3;}
 
 module:
-    "MODULE" ident ";"  ImportList DeclarationSequence "BEGIN" StatementSequence "END" ident "." {$$ = new Module();}
-    | "MODULE" ident ";"  DeclarationSequence "BEGIN" StatementSequence "END" ident "." {$$ = new Module();}
-    | "MODULE" ident ";"  ImportList DeclarationSequence "END" ident "." {$$ = new Module();}
-    | "MODULE" ident ";"  DeclarationSequence "END" ident "." {$$ = new Module();}
+    "MODULE" ident ";"  ImportList DeclarationSequence "BEGIN" StatementSequence "END" ident "." {
+    	$$ = new Module($2, $4, $5, $7, $9);}
+    | "MODULE" ident ";"  DeclarationSequence "BEGIN" StatementSequence "END" ident "." {
+    	$$ = new Module($2, nullptr, $4, $6, $8);}
+    | "MODULE" ident ";"  ImportList DeclarationSequence "END" ident "." {
+    	$$ = new Module($2, $4, $5, nullptr, $7);}
+    | "MODULE" ident ";"  DeclarationSequence "END" ident "." {
+    	$$ = new Module($2, nullptr, $4, nullptr, $6);}
 
 ImportList:
     "IMPORT" ImportSequence ";" {$$ = new ImportList($2);}
