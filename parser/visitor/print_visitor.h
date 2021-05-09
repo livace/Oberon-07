@@ -42,6 +42,15 @@
 #include <parser/ast/designator.h>
 #include <parser/ast/expression_factor.h>
 #include <parser/ast/negation_factor.h>
+#include <parser/ast/case.h>
+#include <parser/ast/case_statement.h>
+#include <parser/ast/elsif_while_list.h>
+#include <parser/ast/for_statement.h>
+#include <parser/ast/integer_label.h>
+#include <parser/ast/qualident_label.h>
+#include <parser/ast/repeat_statement.h>
+#include <parser/ast/string_label.h>
+#include <parser/ast/while_statement.h>
 
 class PrintVisitor : public Visitor {
     template <class T>
@@ -58,6 +67,11 @@ class PrintVisitor : public Visitor {
     void visit(ProcedureDeclaration *procedure_declaration) override {
         std::cerr << "PROCEDURE ";
         go(procedure_declaration->procedureHeading());
+        std::cerr << ";";
+        std::cerr << "\n";
+        go(procedure_declaration->body());
+        std::cerr << "\n";
+        go(procedure_declaration->identifier());
     }
 
     void visit(ProcedureHeading *procedure_heading) override {
@@ -71,14 +85,32 @@ class PrintVisitor : public Visitor {
     }
 
     void visit(Qualident *qualident) override {
-        go(qualident->prefix());
-        if (qualident->identifier()) {
+        if (qualident->prefix()) {
+            go(qualident->prefix());
             std::cerr << ".";
-            go(qualident->identifier());
         }
+
+        go(qualident->identifier());
     }
 
     void visit(Module *module) override {
+        std::cerr << "MODULE ";
+        go(module->name());
+        std::cerr << ";";
+        if (module->importList()) {
+            std::cerr << "\n";
+            go(module->importList());
+        }
+        std::cerr << "\n";
+        go(module->declarations());
+        if (module->statements()) {
+            std::cerr << "BEGIN\n";
+            go(module->statements());
+        }
+        std::cerr << "\n";
+        std::cerr << "END ";
+        go(module->name());
+        std::cerr << ".";
     }
 
     void visit(ConstDeclaration *const_declaration) override {
@@ -121,7 +153,9 @@ class PrintVisitor : public Visitor {
     }
 
     void visit(ArrayType *array_type) {
+        std::cerr << "ARRAY ";
         go(array_type->lengths());
+        std::cerr << " OF ";
         go(array_type->type());
     }
 
@@ -206,19 +240,19 @@ class PrintVisitor : public Visitor {
     }
     
     void visit(IntegerDivision *integer_division) override {
-        std::cerr << "//";
+        std::cerr << "DIV";
     }
     
     void visit(LogicalConjunction *logical_conjunction) override {
-        std::cerr << "&";
+        std::cerr << "AND";
     }
     
     void visit(LogicalDisjunction *logical_disjunction) override {
-        std::cerr << "|";
+        std::cerr << "OR";
     }
 
     void visit(Modulo *modulo) override {
-        std::cerr << "%";
+        std::cerr << "MOD";
     }
     
     void visit(Multiplication *multiplication) override {
@@ -226,7 +260,8 @@ class PrintVisitor : public Visitor {
     }
 
     void visit(SimpleExpression *simple_expression) override {
-        std::cerr << "&";
+        go(simple_expression->unaryOperator());
+        go(simple_expression->terms());
     }
 
     void visit(SingleTerm *single_term) override {
@@ -320,13 +355,37 @@ class PrintVisitor : public Visitor {
     }
 
     void visit(DeclarationSequence *declaration_sequence) {
-        go(declaration_sequence->constDeclarationList());
-        std::cerr << " ";
-        go(declaration_sequence->variableDeclarationList());
-        std::cerr << " ";
-        go(declaration_sequence->typeDeclarationList());
-        std::cerr << " ";
+        bool first = true;
+        if (declaration_sequence->constDeclarationList()) {
+            first = false;
+            std::cerr << "CONST ";
+            go(declaration_sequence->constDeclarationList());
+        }
+        
+        if (declaration_sequence->variableDeclarationList()) {
+            if (!first) {
+                std::cerr << " ";
+            }
+            first = false;
+            std::cerr << "VAR ";
+            go(declaration_sequence->variableDeclarationList());
+        }
+
+        if (declaration_sequence->typeDeclarationList()) {
+            if (!first) {
+                std::cerr << " ";
+            }
+            first = false;
+            std::cerr << "TYPE ";
+            go(declaration_sequence->typeDeclarationList());
+        }
+        
+        if (!first) {
+            std::cerr << " ";
+        }
+        first = false;
         go(declaration_sequence->procedureDeclarationList());
+    
     }
 
     void visit(Import *import) {
@@ -470,7 +529,7 @@ class PrintVisitor : public Visitor {
     }
 
     void visit(NotEqualRelation *not_equal_relation) override {
-        std::cerr << "!=";
+        std::cerr << "#";
     }
 
     void visit(LessRelation *less_relation) override {
@@ -499,7 +558,7 @@ class PrintVisitor : public Visitor {
 
     void visit(Assignment *assignment) override {
         go(assignment->designator());
-        std::cerr << " = ";
+        std::cerr << " := ";
         go(assignment->expression());
     }
 
@@ -549,61 +608,126 @@ class PrintVisitor : public Visitor {
     }
 
     void visit(StatementSequence *statement_sequence) override {
+        bool first = true;
         for (Statement* statement : statement_sequence->statements()) {
+            if (!first) {
+                std::cerr << ";";
+                std::cerr << "\n";
+            }
+            first = false;
             go(statement);
-            std::cerr << "\n";
         }
     }
 
     void visit(Case *case_node) override {
-
+        go(case_node->labelList());
+        std::cerr << ": ";
+        go(case_node->statementSequence());
     }
 
     void visit(CaseLabelList *case_label_list) override {
-
+        bool first = true;
+        for (LabelRange *label_range : case_label_list->labelRanges()) {
+            if (!first) {
+                std::cerr << ", ";
+            }
+            first = false;
+            go(label_range);
+        }
     }
 
     void visit(CaseList *case_list) override {
-
+        bool first = true;
+        for (Case *case_node : case_list->cases()) {
+            if (!first) {
+                std::cerr << "\n| ";
+            } else {
+                std::cerr << "  ";
+            }
+            go(case_node);
+        }
     }
 
     void visit(CaseStatement *case_statement) override {
-
+        std::cerr << "CASE ";
+        go(case_statement->expression());
+        std::cerr << "OF\n";
+        go(case_statement->cases());
+        std::cerr << "\nEND";
     }
 
     void visit(ElsifWhileList *elsif_while_list) override {
-
+        std::cerr << "ELSEIF";
+        go(elsif_while_list->expression());
+        std::cerr << "\n";
+        std::cerr << "DO";
+        std::cerr << "\n";
+        go(elsif_while_list->statementSequence());
+        
+        if (elsif_while_list->elsifWhileList()) {
+            std::cerr << "\n";
+            go(elsif_while_list->elsifWhileList());
+        }
     }
 
     void visit(ForStatement *for_statement) override {
-
+        std::cerr << "FOR ";
+        go(for_statement->variableName());
+        std::cerr << " := ";
+        go(for_statement->variableExpression());
+        std::cerr << " TO ";
+        go(for_statement->toExpression());
+        if (for_statement->byExpression()) {
+            std::cerr << " BY ";
+            go(for_statement->byExpression());        
+        }
+        std::cerr << "\n";
+        std::cerr << "DO";
+        std::cerr << "\n";
+        go(for_statement->body());
+        std::cerr << "\n";
+        std::cerr << "END";
     }
 
     void visit(IntegerLabel *integer_label) override {
-
-    }
-
-    void visit(Label *label) override {
-
+        std::cerr << integer_label->label();
     }
 
     void visit(LabelRange *label_range) override {
-
+        go(label_range->from());
+        std::cerr << "..";
+        go(label_range->to());
     }
 
     void visit(QualidentLabel *qualident_label) override {
-
+        go(qualident_label->label());
     }
 
     void visit(RepeatStatement *repeat_statement) override {
-
+        std::cerr << "REPEAT";
+        std::cerr << "\n";
+        go(repeat_statement->body());
+        std::cerr << "\n";
+        std::cerr << "UNTIL ";
+        go(repeat_statement->expression());
     }
 
     void visit(StringLabel *string_label) override {
-
+        std::cerr << string_label->label();
     }
 
     void visit(WhileStatement *while_statement) override {
-
+        std::cerr << "WHILE ";
+        go(while_statement->expression());
+        std::cerr << "\n";
+        std::cerr << "DO";
+        std::cerr << "\n";
+        go(while_statement->body());
+        if (while_statement->elseList()) {
+            std::cerr << "\n";
+            go(while_statement->elseList());
+        }
+        std::cerr << "\n";
+        std::cerr << "END";
     }
 };

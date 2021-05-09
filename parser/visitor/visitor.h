@@ -202,7 +202,6 @@ public:
     virtual void visit(ElsifWhileList *elsif_while_list) = 0;
     virtual void visit(ForStatement *for_statement) = 0;
     virtual void visit(IntegerLabel *integer_label) = 0;
-    virtual void visit(Label *label) = 0;
     virtual void visit(LabelRange *label_range) = 0;
     virtual void visit(QualidentLabel *qualident_label) = 0;
     virtual void visit(RepeatStatement *repeat_statement) = 0;
