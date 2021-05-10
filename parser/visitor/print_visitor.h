@@ -662,6 +662,7 @@ class PrintVisitor : public Visitor {
             } else {
                 std::cerr << "  ";
             }
+            first = false;
             go(case_node);
         }
     }
@@ -675,7 +676,7 @@ class PrintVisitor : public Visitor {
     }
 
     void visit(ElsifWhileList *elsif_while_list) override {
-        std::cerr << "ELSEIF";
+        std::cerr << "ELSIF";
         go(elsif_while_list->expression());
         std::cerr << "\n";
         std::cerr << "DO";
