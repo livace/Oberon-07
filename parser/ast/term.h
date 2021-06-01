@@ -6,7 +6,10 @@
 
 class Term : public Ast {
 public:
-    Term(Factor *factor, MulOperator *mul_operator = nullptr, Term *term = nullptr) : factor_(factor), term_(term) {}
+    Term(Factor *factor, MulOperator *mul_operator = nullptr, Term *term = nullptr)
+        : factor_(factor)
+        , mul_operator_(mul_operator)
+        , term_(term) {}
 
     void accept(Visitor &visitor) {
         visitor.visit(this);

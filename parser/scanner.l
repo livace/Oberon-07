@@ -106,6 +106,7 @@ blank      [ \t\r]
 "("        return yy::parser::make_LPAREN (loc);
 ")"        return yy::parser::make_RPAREN (loc);
 "="        return yy::parser::make_EQUAL (loc);
+".."       return yy::parser::make_RANGE (loc);
 "."        return yy::parser::make_POINT  (loc);
 "\n"       return yy::parser::make_EOL    (loc);
 "{"        return yy::parser::make_LBRACE (loc);

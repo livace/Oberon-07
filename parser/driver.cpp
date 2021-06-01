@@ -28,7 +28,6 @@ void Driver::scan_begin() {
     if (file.empty () || file == "-") {
     } else {
         stream.open(file);
-        std::cout << file << std::endl;
         scanner.yyrestart(&stream);
     }
 }

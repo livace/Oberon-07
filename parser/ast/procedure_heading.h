@@ -22,6 +22,14 @@ public:
         return formal_parameters_;
     }
 
+    Qualident *getProcedureReturnType() {
+        if (formalParameters()) {
+            return formalParameters()->qualident();
+        } else {
+            return nullptr;
+        }
+    }
+
 private:
     IdentDef *identdef_;
     FormalParameters *formal_parameters_;
