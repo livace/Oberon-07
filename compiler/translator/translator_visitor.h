@@ -55,209 +55,6 @@
 #include <cmath>
 #include <set>
 
-void createDefaultLibrary() {
-    std::string library = R"a0(template <class T>
-        T ABS(T x) {
-            return std::abs(x);
-        }
-
-        bool ODD(int x) {
-            return x & 1;
-        }
-
-        template <class T>
-        int LEN(const T& array) {
-            return array.size();
-        }
-
-        int LSL(int x, int n) {
-            return x << n;
-        }
-
-        int RSR(int x, int n) {
-            return x >> n;
-        }
-
-        int ROR(int x, int n) {
-            return (x >> n) | (n << (32 - n));
-        }
-
-        int FLOOR(float x) {
-            return int(std::floor(x));
-        }
-
-        float FLT(int x) {
-            return float(x);
-        }
-
-        template <class T>
-        int ORD(T x) {
-            return static_cast<int>(x);
-        }
-
-        void INC(int& x, int n = 1) {
-            x += n;
-        }
-
-        void DEC(int& x, int n = 1) {
-            x -= n;
-        }
-
-        void ASSERT(bool value) {
-            assert(value);
-        }
-        template<class T>
-        void NEW(T*& x) {
-            x = new(T);
-        }
-
-        class __Out__ {
-        public:
-            void Ln() {
-                std::cout << '\n';
-            }
-
-            template<typename ... Args>
-            void Int(Args ... args) {
-                ((std::cout << args << ' '), ...);
-            }
-
-            template<typename ... Args>
-            void Real(Args ... args) {
-                ((std::cout << args << ' '), ...);
-            }
-
-            template<typename ... Args>
-            void String(Args ... args) {
-                ((std::cout << args << ' '), ...);
-            }
-        } static Out;
-
-        class Range {
-public:
-    Range(int from, int to): from_(from), to_(to) {
-        if (from_ > to_) {
-            std::swap(from_, to_);
-        }
-    }
-
-    Range(int value): from_(value), to_(value) {}
-
-    int from() const {
-        return from_;
-    }
-
-    int to() const {
-        return to_;
-    }
-private:
-    int from_, to_;
-};
-
-class FactorSet {
-public:
-    FactorSet() = default;
-
-    void Add(Range range) {
-        for (int i = range.from(); i <= range.to(); ++i) {
-            set_.insert(i);
-        }
-    }
-
-    void Add(int value) {
-        set_.insert(value);
-    }
-
-    void Remove(int value) {
-        set_.erase(value);
-    }
-
-    template <class T, class... Ts>
-    FactorSet(T f, Ts... rest) {
-        Add(f);
-        *this = *this + FactorSet(rest...);
-    }
-
-    FactorSet operator + (const FactorSet& other) const {
-        FactorSet temp = *this;
-        temp.set_.insert(other.set_.begin(), other.set_.end());
-        return temp;
-    }
-
-    FactorSet operator - (const FactorSet& other) const {
-        FactorSet temp = *this;
-        for (const auto& value : other.set_) {
-            temp.set_.erase(value);
-        }
-        return temp;
-    }
-
-    FactorSet operator * (const FactorSet& other) const {
-        std::set<int> result;
-        for (const auto& value : set_) {
-            if (other.set_.count(value)) {
-                result.insert(value);
-            }
-        }
-        return FactorSet(result);
-    }
-
-    FactorSet operator / (const FactorSet& other) const {
-        std::set<int> result;
-        for (const auto& value : set_) {
-            if (!other.set_.count(value)) {
-                result.insert(value);
-            }
-        }
-        for (const auto& value : other.set_) {
-            if (!set_.count(value)) {
-                result.insert(value);
-            }
-        }
-        return result;
-    }
-
-    bool operator == (const FactorSet& other) const {
-        return other.set_ == set_;
-    }
-
-    bool operator != (const FactorSet& other) const {
-        return other.set_ != set_;
-    }
-
-    void Print() const {
-        for (const auto& value: set_) {
-            std::cout << value << ' ';
-        }
-        std::cout << '\n';
-    }
-
-    friend bool operator % (const FactorSet& lhs, int i);
-    friend bool operator % (int i, const FactorSet& rhs);
-    private:
-        FactorSet(std::set<int> set) : set_(std::move(set)) {}
-        std::set<int> set_;
-    };
-
-    bool operator % (const FactorSet& lhs, int i) {
-        return lhs.set_.count(i);
-    }
-
-    bool operator % (int i, const FactorSet& rhs) {
-        return rhs.set_.count(i);
-    }
-
-    void INCL(FactorSet& set, int value) {
-        set.Add(value);
-    }
-
-    void EXCL(FactorSet& set, int value) {
-        set.Remove(value);
-    }
-)a0";
-    std::cout << library;
-}
-
 class TranslatorVisitor : public Visitor {
 public:
     template <class T>
@@ -268,31 +65,31 @@ public:
     }
 
     void visit(Identifier *identifier) override {
-        std::cout << identifier->identifier();
+        out_ << identifier->identifier();
     }
 
     void visit(ProcedureDeclaration *procedure_declaration) override {
         go(procedure_declaration->procedureHeading());
-        std::cout << "{\n";
+        out_ << "{\n";
         go(procedure_declaration->body());
-        std::cout << "}\n\n";
+        out_ << "}\n\n";
     }
 
     void getReturnType(Qualident *return_type) {
         if (return_type != nullptr) {
             qualidentToString(return_type);
         } else {
-            std::cout << "void";
+            out_ << "void";
         }
     }
 
     void visit(ProcedureHeading *procedure_heading) override {
         getReturnType(procedure_heading->getProcedureReturnType());
-        std::cout << " ";
+        out_ << " ";
         go(procedure_heading->identDef());
-        std::cout << "(";
+        out_ << "(";
         go(procedure_heading->formalParameters());
-        std::cout << " )";
+        out_ << " )";
     }
 
     void addIdentTypes(IdentDefList *list, Type *type) {
@@ -318,12 +115,12 @@ public:
     void visit(VariableDeclaration *variable_declaration) override {
         addIdentTypes(variable_declaration->identList(), variable_declaration->type());
         go(variable_declaration->type());
-        std::cout << " ";
+        out_ << " ";
         if (auto array_type = dynamic_cast<ArrayType*>(variable_declaration->type()); array_type) {
             bool is_first = true;
             for (const auto& identdef : variable_declaration->identList()->identdefs()) {
                 if (!is_first) {
-                    std::cout << ", ";
+                    out_ << ", ";
                 }
                 go(identdef);
                 createVectorConstruction(array_type);
@@ -332,38 +129,53 @@ public:
         } else {
             go(variable_declaration->identList());
         }
-        std::cout << ";\n";
+        out_ << ";\n";
     }
 
     void visit(Qualident *qualident) override {
         if (qualident->prefix()) {
             go(qualident->prefix());
-            std::cerr << ".";
+            out_ << ".";
         }
         go(qualident->identifier());
     }
 
     void visit(Root *root) override {
-        std::cout << "#include <bits/stdc++.h>\n";
-        createDefaultLibrary();
+        out_ = std::ofstream(root->module()->name()->identifier() + ".h");
+
+        out_ << "#pragma once\n";
+        out_ << "#include \"Lib.h\"\n";
         go(root->module());
     }
 
     void visit(Module *module) override {
+        go(module->importList());
+
+        inside_namespace_ = true;
+        out_ << "namespace __" << module->name()->identifier() << "__ {";
+
+        go(module->importList());
+
         go(module->declarations());
+
+        out_ << "class __" << module->name()->identifier() << "__ {\n";
+        out_ << "public:";
+
         if (module->statements()) {
-            std::cout << "\nint main() {\n";
+            out_ << "void main() { ";
             go(module->statements());
-            std::cout << "}\n";
+            out_ << " }";
         }
+        out_ << "\n} " << module->name()->identifier() << ";";
+        out_ << "}";
     }
 
     void visit(ConstDeclaration *const_declaration) override {
-        std::cout << "const auto ";
+        out_ << "const auto ";
         go(const_declaration->identifier());
-        std::cout << " = ";
+        out_ << " = ";
         go(const_declaration->constExpression());
-        std::cout << ";\n";
+        out_ << ";\n";
     }
 
     void visit(ConstExpression *const_expression) override {
@@ -373,27 +185,27 @@ public:
     void visit(Expression *expression) override {
         go(expression->primary());
         if (expression->relation()) {
-            std::cout << " ";
+            out_ << " ";
             go(expression->relation());
-            std::cout << " ";
+            out_ << " ";
             go(expression->secondary());
         }
     }
 
     void visit(IdentDef *identdef) override {
-        std::cout << identdef->identifier();
+        out_ << identdef->identifier();
     }
 
     void visit(Real *number) override {
-        std::cout << number->value();
+        out_ << number->value();
     }
 
     void visit(Integer *number) override {
-        std::cout << number->value();
+        out_ << number->value();
     }
 
     void visit(String *string) override {
-        std::cout << string->value();
+        out_ << string->value();
     }
 
     bool createVectorOfVectors(size_t size, Type *type) {
@@ -402,34 +214,34 @@ public:
             return false;
         }
         if (size >= 1) {
-            std::cout << "std::vector<";
+            out_ << "std::vector<";
             createVectorOfVectors(size - 1, type);
-            std::cout << ">";
+            out_ << ">";
         }
         return true;
     }
 
     void createVectorConstruction(ArrayType *array_type) {
-        std::cout << "(";
+        out_ << "(";
         size_t size = array_type->lengths()->lengths().size();
         Type *type = array_type->type();
         auto& lengths = array_type->lengths()->lengths();
         for (auto it = lengths.rbegin(); it != lengths.rend(); ++it) {
             go(*it);
-            std::cout <<", ";
+            out_ <<", ";
             if (size != 1) {
                 if (createVectorOfVectors(--size, type)) {
-                    std::cout << "(";
+                    out_ << "(";
                 }
             }
         }
         size = array_type->lengths()->lengths().size();
-        std::cout << "0)";
-        std::cout << std::string(size - 1, ')');
+        out_ << "0)";
+        out_ << std::string(size - 1, ')');
     }
 
     void visit(Number *number) override {
-        std::cout << number->float_value();
+        out_ << number->float_value();
     }
 
     void visit(ArrayType *array_type) override {
@@ -442,16 +254,16 @@ public:
     }
 
     void visit(BaseType *base_type) override {
-        std::cout << ": public ";
+        out_ << ": public ";
         go(base_type->qualident());
     }
 
     void visit(FieldList *field_list) override {
         addIdentTypes(field_list->identList(), field_list->type());
         go(field_list->type());
-        std::cout << " ";
+        out_ << " ";
         go(field_list->identList());
-        std::cout << ";\n";
+        out_ << ";\n";
     }
 
     void visit(FieldListSequence *field_list_sequence) override {
@@ -464,7 +276,7 @@ public:
         bool first = true;
         for (auto& identdef : ident_list->identdefs()) {
             if (!first) {
-                std::cerr << ", ";
+                out_ << ", ";
             }
             first = false;
             go(identdef);
@@ -485,23 +297,23 @@ public:
             go(record_type);
         }
         go(pointer_type->type());
-        std::cout << "*";
+        out_ << "*";
     }
 
     void qualidentToString(Qualident *qualident) {
         std::string type = qualident->identifier()->identifier();
         if (type == "INTEGER") {
-            std::cout << "int";
+            out_ << "int";
         } else if (type == "REAL") {
-            std::cout << "float";
+            out_ << "float";
         } else if (type == "BYTE") {
-            std::cout << "std::byte";
+            out_ << "std::byte";
         } else if (type == "BOOLEAN") {
-            std::cout << "bool";
+            out_ << "bool";
         } else if (type == "CHAR") {
-            std::cout << "char";
+            out_ << "char";
         } else if (type == "SET") {
-            std::cout << "FactorSet";
+            out_ << "FactorSet";
         } else {
             go(qualident);
         }
@@ -513,15 +325,15 @@ public:
 
     void visit(RecordType *record_type) override {
         if (record_name_.empty()) {
-            std::cout << "struct struct" + std::to_string(record_num++);
+            out_ << "struct struct" + std::to_string(record_num++);
         } else {
-            std::cout << "struct " + record_name_;
+            out_ << "struct " + record_name_;
             record_name_.clear();
         }
         go(record_type->baseType());
-        std::cout << "{\n";
+        out_ << "{\n";
         go(record_type->fieldListSequence());
-        std::cout << "\n};\n";
+        out_ << "\n};\n";
     }
 
     void visit(TypeDeclaration *type_declaration) override {
@@ -542,43 +354,43 @@ public:
                 go(record_type);
             }
         }
-        std::cout << "using ";
+        out_ << "using ";
         go(type_declaration->identDef());
-        std::cout << " = ";
+        out_ << " = ";
         go(type_declaration->type());
-        std::cout << ";\n";
+        out_ << ";\n";
     }
 
     void visit(BinaryMinus *binary_minus) override {
-        std::cout << "-";
+        out_ << "-";
     }
 
     void visit(BinaryPlus *binary_plus) override {
-        std::cout << "+";
+        out_ << "+";
     }
 
     void visit(Division *division) override {
-        std::cout << "/";
+        out_ << "/";
     }
 
     void visit(IntegerDivision *integer_division) override {
-        std::cout << "/";
+        out_ << "/";
     }
 
     void visit(LogicalConjunction *logical_conjunction) override {
-        std::cout << "&&";
+        out_ << "&&";
     }
 
     void visit(LogicalDisjunction *logical_disjunction) override {
-        std::cout << "||";
+        out_ << "||";
     }
 
     void visit(Modulo *modulo) override {
-        std::cout << "%";
+        out_ << "%";
     }
 
     void visit(Multiplication *multiplication) override {
-        std::cout << "*";
+        out_ << "*";
     }
 
     void visit(SimpleExpression *simple_expression) override {
@@ -593,9 +405,9 @@ public:
     void visit(Term *term) override {
         go(term->factor());
         if (term->mulOperator()) {
-            std::cerr << " ";
+            out_ << " ";
             go(term->mulOperator());
-            std::cerr << " ";
+            out_ << " ";
             go(term->term());
         }
     }
@@ -603,19 +415,19 @@ public:
     void visit(TermOperation *term_operation) override {
         go(term_operation->lhs());
         if (term_operation->add_operator()) {
-            std::cout << ' ';
+            out_ << ' ';
             go(term_operation->add_operator());
-            std::cout << ' ';
+            out_ << ' ';
             go(term_operation->rhs());
         }
     }
 
     void visit(UnaryMinus *unary_minus) override {
-        std::cout << "-";
+        out_ << "-";
     }
 
     void visit(UnaryPlus *unary_plus) override {
-        std::cout << "+";
+        out_ << "+";
     }
 
     void visit(FormalParameters *formal_parameters) override {
@@ -630,13 +442,13 @@ public:
         bool is_first = true;
         for (const auto& ident : fp_section->identifierList()->identifiers()) {
             if (!is_first) {
-                std::cout << ", ";
+                out_ << ", ";
             }
             go(fp_section->formalType());
             if (fp_section->isVariable()) {
-                std::cout << "&";
+                out_ << "&";
             }
-            std::cout << " " << ident->identifier();
+            out_ << " " << ident->identifier();
             variable_types[ident->identifier()] = new QualidentType(fp_section->formalType()->qualident());
             is_first = false;
         }
@@ -646,7 +458,7 @@ public:
         bool is_first = true;
         for (auto& fp_section : fp_section_list->FPSections()) {
             if (!is_first) {
-                std::cerr << ", ";
+                out_ << ", ";
             }
             is_first = false;
             go(fp_section);
@@ -658,11 +470,11 @@ public:
     }
 
     void visit(ProcedureType *procedure_type) override {
-        std::cout << "std::function<";
+        out_ << "std::function<";
         qualidentToString(procedure_type->formal_parameters()->qualident());
-        std::cout << "(";
+        out_ << "(";
         go(procedure_type->formal_parameters());
-        std::cout << ")>";
+        out_ << ")>";
     }
 
     void visit(VariableDeclarationList *variable_declaration_list) override {
@@ -696,15 +508,26 @@ public:
         go(declaration_sequence->procedureDeclarationList());
     }
 
-    void visit(Import *import) override {
-        // TODO: Add imports
-    }
+    void visit(Import *import) override {}
 
     void visit(ImportList *import_list) override {
-        // TODO: Add imports
+        go(import_list->importSequence());
     }
+
     void visit(ImportSequence *import_sequence) override {
-        // TODO: Add imports
+        if (inside_namespace_) {
+            for (Import *import : import_sequence->imports()) {
+                if (import->identifier()->identifier() != "In" && import->identifier()->identifier() != "Out") {
+                    out_ << "using " << import->alias()->identifier() << " = __" << import->identifier()->identifier() << "__::" << import->identifier()->identifier() << "\n"; 
+                }
+            }
+        } else {
+            for (Import *import : import_sequence->imports()) {
+                if (import->identifier()->identifier() != "In" && import->identifier()->identifier() != "Out") {
+                    out_ << "#include \"" << import->identifier()->identifier() << ".h\"\n"; 
+                }
+            }
+        }
     }
 
     void visit(NumberFactor* number_factor) override {
@@ -716,46 +539,46 @@ public:
     }
 
     void visit(NilFactor* nil_factor) override {
-        std::cout << "NULL";
+        out_ << "NULL";
     }
 
     void visit(TrueFactor* true_factor) override {
-        std::cout << "true";
+        out_ << "true";
     }
 
     void visit(FalseFactor* false_factor) override {
-        std::cout << "false";
+        out_ << "false";
     }
 
     void visit(SingleElement* single_element) override {
-        std::cout << "Range(";
+        out_ << "Range(";
         go(single_element->expression());
-        std::cout << ")";
+        out_ << ")";
     }
 
     void visit(Elements* elements) override {
         go(elements->element());
 
         if (elements->elements()) {
-            std::cerr << ", ";
+            out_ << ", ";
             go(elements->elements());
         }
     }
 
     void visit(Range* range) override {
-        std::cout << "Range(";
+        out_ << "Range(";
         go(range->from());
         if (range->to()) {
-            std::cout << ", ";
+            out_ << ", ";
             go(range->to());
         }
-        std::cout << ")";
+        out_ << ")";
     }
 
     void visit(Set* set) override {
-        std::cout << "FactorSet(";
+        out_ << "FactorSet(";
         go(set->elements());
-        std::cout << ")";
+        out_ << ")";
     }
 
     void visit(SetFactor* set_factor) override {
@@ -765,7 +588,7 @@ public:
     void visit(ExpList* exp_list) override {
         go(exp_list->expression());
         if (exp_list->expList()) {
-            std::cerr << ", ";
+            out_ << ", ";
             go(exp_list->expList());
         }
     }
@@ -776,17 +599,17 @@ public:
 
     void visit(FieldSelector *field_selector) override {
         if (use_pointer_selector) {
-            std::cout << "->";
+            out_ << "->";
         } else {
-            std::cout << ".";
+            out_ << ".";
         }
         go(field_selector->ident());
     }
 
     void selectArray(ExpList *list) {
-        std::cout << "[";
+        out_ << "[";
         go(list->expression());
-        std::cout << "]";
+        out_ << "]";
         if (list->expList()) {
             selectArray(list->expList());
         }
@@ -797,7 +620,7 @@ public:
     }
 
     void visit(PointerDereference *pointer_dereference) override {
-        std::cout << "*";
+        out_ << "*";
     }
 
     void visit(Selectors *selectors) override {
@@ -817,81 +640,81 @@ public:
     void visit(DesignatorFactor *designator_factor) override {
         go(designator_factor->designator());
         if (designator_factor->actualParameters()) {
-            std::cout << "(";
+            out_ << "(";
             go(designator_factor->actualParameters());
-            std::cout << ")";
+            out_ << ")";
         }
     }
 
     void visit(ExpressionFactor *expression_factor) override {
-        std::cout << "(";
+        out_ << "(";
         go(expression_factor->expression());
-        std::cout << ")";
+        out_ << ")";
     }
 
     void visit(NegationFactor *negation_factor) override {
-        std::cout << "!";
+        out_ << "!";
         go(negation_factor->factor());
     }
 
     void visit(EqualRelation *equal_relation) override {
-        std::cout << "==";
+        out_ << "==";
     }
 
     void visit(NotEqualRelation *not_equal_relation) override {
-        std::cout << "!=";
+        out_ << "!=";
     }
 
     void visit(LessRelation *less_relation) override {
-        std::cout << "<";
+        out_ << "<";
     }
 
     void visit(LessEqualRelation *less_equal_relation) override {
-        std::cout << "<=";
+        out_ << "<=";
     }
 
     void visit(GreaterRelation *greater_relation) override {
-        std::cout << ">";
+        out_ << ">";
     }
 
     void visit(GreaterEqualRelation *greater_equal_relation) override {
-        std::cout << ">=";
+        out_ << ">=";
     }
 
     void visit(InRelation *in_relation) override {
-        std::cout << "%";
+        out_ << "%";
     }
 
     void visit(IsRelation *is_relation) override {
-        std::cout << "Oops";
+        out_ << "Oops";
     }
 
     void visit(Assignment *assignment) override {
         go(assignment->designator());
-        std::cout << " = ";
+        out_ << " = ";
         go(assignment->expression());
     }
 
     void visit(ElsifList *elsif_list) override {
-        std::cout << "else if ( ";
+        out_ << "else if ( ";
         go(elsif_list->expression());
-        std::cerr << ") {\n";
+        out_ << ") {\n";
         go(elsif_list->statementSequence());
-        std::cout << "} \n";
+        out_ << "} \n";
         go(elsif_list->elsifList());
     }
 
     void visit(IfStatement *if_statement) override {
-        std::cout << "if (";
+        out_ << "if (";
         go(if_statement->expression());
-        std::cout << ") {\n";
+        out_ << ") {\n";
         go(if_statement->thenStatements());
-        std::cout << "}\n";
+        out_ << "}\n";
         go(if_statement->elsifList());
         if (if_statement->elseStatements()) {
-            std::cout << "else {";
+            out_ << "else {";
             go(if_statement->elseStatements());
-            std::cout << "}\n";
+            out_ << "}\n";
         }
     }
 
@@ -899,17 +722,17 @@ public:
         go(procedure_body->declarationSequence());
         go(procedure_body->body());
         if (procedure_body->returnExpression()) {
-            std::cout << "return ";
+            out_ << "return ";
             go(procedure_body->returnExpression());
-            std::cout << ";";
+            out_ << ";";
         }
     }
 
     void visit(ProcedureCall *procedure_call) override {
         go(procedure_call->designator());
-        std::cout << "(";
+        out_ << "(";
         go(procedure_call->actualParameters());
-        std::cout << ")";
+        out_ << ")";
     }
 
     bool isStatementNeedsSemicolon(Statement *statement) {
@@ -920,7 +743,7 @@ public:
         for (Statement* statement : statement_sequence->statements()) {
             go(statement);
             if (isStatementNeedsSemicolon(statement)) {
-                std::cout << ";\n";
+                out_ << ";\n";
             }
         }
     }
@@ -931,12 +754,12 @@ public:
     void visit(CaseStatement *case_statement) override {}
 
     void createWhileBody(Expression *condition, StatementSequence *body) {
-        std::cout << "if (";
+        out_ << "if (";
         go(condition);
-        std::cout << ") {\n";
+        out_ << ") {\n";
         go(body);
-        std::cout << "continue;\n";
-        std::cout << "}\n";
+        out_ << "continue;\n";
+        out_ << "}\n";
     }
 
     void visit(ElsifWhileList *elsif_while_list) override {
@@ -946,35 +769,35 @@ public:
 
     void getByExpression(ConstExpression *expression) {
         if (!expression) {
-            std::cout << "1";
+            out_ << "1";
         } else {
             go(expression);
         }
     }
 
     void visit(ForStatement *for_statement) override {
-        std::cout << "for (int ";
+        out_ << "for (int ";
         go(for_statement->variableName());
-        std::cout << " = ";
+        out_ << " = ";
         go(for_statement->variableExpression());
-        std::cout << ";;";
+        out_ << ";;";
         go(for_statement->variableName());
-        std::cout << " += ";
+        out_ << " += ";
         getByExpression(for_statement->byExpression());
-        std::cout << ") {\n";
-        std::cout << "if ((";
+        out_ << ") {\n";
+        out_ << "if ((";
         getByExpression(for_statement->byExpression());
-        std::cout << ") > 0) {\n if (";
+        out_ << ") > 0) {\n if (";
         go(for_statement->variableName());
-        std::cout << " > ";
+        out_ << " > ";
         go(for_statement->toExpression());
-        std::cout << ") {\n break;\n}\n} else {\n if (";
+        out_ << ") {\n break;\n}\n} else {\n if (";
         go(for_statement->variableName());
-        std::cout << " < ";
+        out_ << " < ";
         go(for_statement->toExpression());
-        std::cout << ") {\n break;\n}\n}\n";
+        out_ << ") {\n break;\n}\n}\n";
         go(for_statement->body());
-        std::cout << "}\n";
+        out_ << "}\n";
     }
 
     void visit(IntegerLabel *integer_label) override {}
@@ -982,26 +805,30 @@ public:
     void visit(QualidentLabel *qualident_label) override {}
 
     void visit(RepeatStatement *repeat_statement) override {
-        std::cout << "do {\n";
+        out_ << "do {\n";
         go(repeat_statement->body());
-        std::cout << "} while (!(";
+        out_ << "} while (!(";
         go(repeat_statement->expression());
-        std::cout << "));\n";
+        out_ << "));\n";
     }
 
     void visit(StringLabel *string_label) override {}
 
     void visit(WhileStatement *while_statement) override {
-        std::cout << "while (true) {\n";
+        out_ << "while (true) {\n";
         createWhileBody(while_statement->expression(), while_statement->body());
         go(while_statement->elseList());
-        std::cout << "break;\n";
-        std::cout << "}\n";
+        out_ << "break;\n";
+        out_ << "}\n";
     }
+
 private:
     bool use_pointer_selector = false;
     size_t record_num = 1;
     std::string record_name_;
     std::map<std::string, bool> is_pointer_qualident;
     std::map<std::string, Type*> variable_types;
+
+    std::ofstream out_;
+    bool inside_namespace_ = false;
 };

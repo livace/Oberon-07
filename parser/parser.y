@@ -189,6 +189,7 @@
     DO "DO"
     TO "TO"
     FOR "FOR"
+    OR "OR"
     PROCEDURE "PROCEDURE"
     RETURN "RETURN"
     END "END"
@@ -297,7 +298,7 @@ unit:
 
 qualident:
     ident {$$ = new Qualident($1);}
-//    | ident "." ident {$$ = new Qualident($1, $3);}
+    | ident "." ident {$$ = new Qualident($1, $3);}
 
 identdef:
     ident {$$ = new IdentDef($1);}

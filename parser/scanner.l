@@ -83,6 +83,7 @@ blank      [ \t\r]
 "DO"       return yy::parser::make_DO (loc);
 "TO"       return yy::parser::make_TO (loc);
 "FOR"      return yy::parser::make_FOR (loc);
+"OR"       return yy::parser::make_OR (loc);
 "PROCEDURE" return yy::parser::make_PROCEDURE (loc);
 "RETURN"   return yy::parser::make_RETURN (loc);
 "END"      return yy::parser::make_END (loc);
