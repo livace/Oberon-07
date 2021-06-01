@@ -195,8 +195,13 @@ class PrintVisitor : public Visitor {
     }
 
     void visit(LengthList *length_list) {
+        bool is_first = true;
         for (auto& length : length_list->lengths()) {
+            if (!is_first) {
+                std::cout << ", ";
+            }
             go(length);
+            is_first = false;
         }
     }
 
@@ -250,7 +255,7 @@ class PrintVisitor : public Visitor {
     }
     
     void visit(LogicalConjunction *logical_conjunction) override {
-        std::cerr << "AND";
+        std::cerr << "&";
     }
     
     void visit(LogicalDisjunction *logical_disjunction) override {
@@ -468,8 +473,10 @@ class PrintVisitor : public Visitor {
 
     void visit(Range* range) override {
         go(range->from());
-        std::cerr << "..";
-        go(range->to());
+        if (range->to()) {
+            std::cerr << "..";
+            go(range->to());
+        }
     }
 
     void visit(Set* set) override {

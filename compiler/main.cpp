@@ -2,6 +2,7 @@
 #include <parser/driver.hh>
 
 #include "parser/visitor/print_visitor.h"
+#include "translator/translator_visitor.h"
 
 int main(int argc, char **argv) {
   Driver driver;
@@ -12,8 +13,7 @@ int main(int argc, char **argv) {
       } else if (argv[i] == std::string("-s")) {
           driver.trace_scanning = true;
       } else if (!driver.parse(argv[i])) {
-          std::cout << "Ok" << '\n';
-          PrintVisitor visitor;
+          TranslatorVisitor visitor;
           driver.root->accept(visitor);
       } else {
           res = 1;

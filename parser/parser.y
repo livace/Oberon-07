@@ -178,7 +178,7 @@
     NIL "NIL"
     TRUE "TRUE"
     FALSE "FALSE"
-    SET "set"
+    SET "SET"
     ELSE "ELSE"
     ELSIF "ELSIF"
     THEN "THEN"
@@ -205,6 +205,7 @@
     IMPORT "IMPORT"
     MODULE "MODULE"
     WHILE "WHILE"
+    RANGE ".."
 ;
 
 %token <std::string> IDENT "ident"
@@ -296,7 +297,7 @@ unit:
 
 qualident:
     ident {$$ = new Qualident($1);}
-    | ident "." ident {$$ = new Qualident($1, $3);}
+//    | ident "." ident {$$ = new Qualident($1, $3);}
 
 identdef:
     ident {$$ = new IdentDef($1);}
@@ -335,7 +336,7 @@ ArrayType:
 
 LengthList:
     length {$$ = new LengthList($1);}
-    | LengthList "," length {$1->addLength($3);}
+    | LengthList "," length {$1->addLength($3); $$ = $1;}
 
 length: // length == ConstExpression == exression
     ConstExpression {$$ = new Length($1);}
@@ -351,7 +352,7 @@ BaseType:
 
 FieldListSequence:
     FieldList {$$ = new FieldListSequence($1);}
-    | FieldListSequence ";" FieldList {$1->addFieldList($3);}
+    | FieldListSequence ";" FieldList {$1->addFieldList($3); $$ = $1;}
 
 FieldList:
     IdentDefList ":" type {$$ = new FieldList($1, $3);}
@@ -399,15 +400,15 @@ AddOperator:
     | "OR" {  $$ = new LogicalDisjunction(); }
 
 term:
-    factor { $$ = new Term($1); }
-    | factor MulOperator term { $$ = new Term($1, $2, $3); }
+    factor { $$ = new Term($1, nullptr, nullptr);}
+    | factor MulOperator term { $$ = new Term($1, $2, $3);}
 
 MulOperator:
     "*" { $$ = new Multiplication(); }
     | "/" { $$ = new Division(); }
     | "DIV" { $$ = new IntegerDivision(); }
     | "MOD" { $$ = new Modulo(); }
-    | "&" { $$ = new LogicalConjunction(); }
+    | "&" { $$ = new LogicalConjunction();}
 
 factor:
     number { $$ = new NumberFactor($1); }
@@ -433,7 +434,8 @@ set:
     "{" elements "}" { $$ = new Set($2); }
 
 elements:
-    element { $$ = new Elements($1); }
+    %empty {$$ = new Elements(nullptr);}
+    | element { $$ = new Elements($1); }
     | element "," elements {$$ = new Elements($1, $3); }
 
 element:
@@ -471,7 +473,8 @@ ProcedureCall:
     | designator ActualParameters {$$ = new ProcedureCall($1, $2);}
 
 StatementSequence:
-    statement {$$ = new StatementSequence($1);}
+    %empty {$$ = new StatementSequence(nullptr);}
+    |statement {$$ = new StatementSequence($1);}
     | StatementSequence ";" statement {$1->addStatement($3); $$ = $1;}
 
 IfStatement:
@@ -604,15 +607,18 @@ DeclarationSequence:
     }
 
 ConstDeclarationList:
-    ConstDeclaration ";" {$$ = new ConstDeclarationList($1);}
+    %empty {$$ = new ConstDeclarationList(nullptr);}
+    | ConstDeclaration ";" {$$ = new ConstDeclarationList($1);}
     | ConstDeclarationList ConstDeclaration ";" {$1->addConstDeclaration($2); $$ = $1;}
 
 VariableDeclarationList:
-    VariableDeclaration ";" {$$ = new VariableDeclarationList($1);}
+    %empty {$$ = new VariableDeclarationList(nullptr);}
+    | VariableDeclaration ";" {$$ = new VariableDeclarationList($1);}
     | VariableDeclarationList VariableDeclaration ";" {$1->addVariableDeclaration($2); $$ = $1;}
 
 TypeDeclarationList:
-    TypeDeclaration ";" {$$ = new TypeDeclarationList($1);}
+    %empty {$$ = new TypeDeclarationList(nullptr);}
+    | TypeDeclaration ";" {$$ = new TypeDeclarationList($1);}
     | TypeDeclarationList TypeDeclaration ";" {$1->addTypeDeclaration($2); $$ = $1;}
 
 ProcedureDeclarationList:
