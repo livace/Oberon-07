@@ -44,10 +44,20 @@ blank      [ \t\r]
 "(*" {
   int c;
 
+  int depth = 1;
   while((c = yyinput()) != 0) {
+    if (c == '(') {
+      if ((c = yyinput()) == '*') {
+        ++depth;
+      }
+    }
+
     if(c == '*') {
       if((c = yyinput()) == ')') {
-        break;
+        --depth;
+        if (depth == 0) {
+          break;
+        }
       } else {
         unput(c);
       }

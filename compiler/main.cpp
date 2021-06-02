@@ -83,6 +83,18 @@ void createDefaultLibrary() {
                 std::cout << str;
             }
 
+            void Char(std::string c) {
+                std::cout << c;
+            }
+            
+            void Char(char c) {
+                std::cout << c;
+            }
+
+            void Hex(int x) {
+                std::cout << std::hex << x;
+            }
+
             void String(const std::string& str) {
                 std::cout << str;
             }
