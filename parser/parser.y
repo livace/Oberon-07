@@ -298,7 +298,7 @@ unit:
 
 qualident:
     ident {$$ = new Qualident($1);}
-    | ident "." ident {$$ = new Qualident($1, $3);}
+//    | ident "." ident {$$ = new Qualident($1, $3);}
 
 identdef:
     ident {$$ = new IdentDef($1);}
